@@ -1,20 +1,14 @@
 import json
 
 
-def andmete_lisamine(failinimi, nimi, koordinaat, grupp, vooluvajadus, kommentaar, vajalikud_esemed):
-    andme_fail = open(failinimi, 'w', encoding='utf-8')
-
-
-    andme_fail.close()
-
 def lisa_sonastikku(sonastik, punkti_nimi):
     sonastik[punkti_nimi] = {
         'nimi': '',
         'koordinaat': (),
         'grupp': '',
-        'vooluvajadus': '',
+        'vooluvajadus': 0,
         'kommentaar': '',
-        'vajalikud_esemed': {}
+        'vajalikud esemed': {}
     }
 
 def muuda_nime(sonastik, punkti_nimi, nimi):
@@ -27,10 +21,17 @@ def muuda_koodinaate(sonastik, punkti_nimi, koordinaat):
 
 def muuda_gruppi(sonastik, punkti_nimi, grupp):
     sonastik[punkti_nimi]['grupp'] = grupp
-
+    if grupp not in sonastik:
+        sonastik[grupp] = {
+            'grupi vooluvajadus': 0,
+            'grupi vajalikud esemed': {}
+        }
+    uuenda_grupi_vooluvajadust(sonastik)
+    uuenda_grupi_esemeid(sonastik)
 
 def muuda_vooluvajadust(sonastik, punkti_nimi, vooluvajadus):
     sonastik[punkti_nimi]['vooluvajadus'] = vooluvajadus
+    uuenda_grupi_vooluvajadust(sonastik)
 
 
 def muuda_kommentaari(sonastik, punkti_nimi, kommentaar):
@@ -38,14 +39,15 @@ def muuda_kommentaari(sonastik, punkti_nimi, kommentaar):
 
 
 def muuda_vajalike_esemeid(sonastik, punkti_nimi, vajalikud_esemed):
-    sonastik[punkti_nimi]['vajalikud_esemed'] = vajalikud_esemed
+    sonastik[punkti_nimi]['vajalikud esemed'] = vajalikud_esemed
 
 
 def lisa_vajalik_ese(sonastik, punkti_nimi, vajalik_ese, kogus = 1):
-    if vajalik_ese in sonastik[punkti_nimi]['vajalikud_esemed']:
-        sonastik[punkti_nimi]['vajalikud_esemed'][vajalik_ese] += kogus
+    if vajalik_ese in sonastik[punkti_nimi]['vajalikud esemed']:
+        sonastik[punkti_nimi]['vajalikud esemed'][vajalik_ese] += kogus
     else:
-        sonastik[punkti_nimi]['vajalikud_esemed'][vajalik_ese] = kogus
+        sonastik[punkti_nimi]['vajalikud esemed'][vajalik_ese] = kogus
+    uuenda_grupi_esemeid(sonastik)
 
 
 def prindi_punkti_andmed(sonastik, punkti_nimi):
@@ -57,40 +59,63 @@ def str_to_koordinaat(koordinaat):
     koordinaadid = [x.strip() for x in koordinaat.split(',')]
     return (int(koordinaadid[0]), int(koordinaadid[1]))
 
+
 def salvesta_faili(sonastik, failinimi):
     fail = open(failinimi, 'w', encoding='utf-8')
     json.dump(sonastik, fail, ensure_ascii=False, indent=4)
     fail.close
 
 
+def impordi(failinimi):
+    with open(failinimi, 'r', encoding='utf-8') as fail:
+        global andme_sonastik
+        andme_sonastik = json.load(fail)
 
-andme_sonastik = {
-    'punkt1': {
-             'nimi': 'Punkt1',
-             'koordinaat': (1234, 720),
-             'grupp': 'Esimene grupp',
-             'vooluvajadus': 1200,
-             'kommentaar': '',
-             'vajalikud_esemed': {'10 meetrine 16A kaabel': 1, '5 meetrine 16A kaabel': 3, '16A alajaotusjaam': 1}
-             },
 
-    'punkt2': {'nimi': 'Punkt2',
-             'koordinaat': (123, 360),
-             'grupp': 'Esimene grupp',
-             'vooluvajadus': 1500,
-             'kommentaar': 'See on kommentaar',
-             'vajalikud_esemed': {'10 meetrine 16A kaabel': 1}
-             }
-}
+def mis_punkt(sonastik):
+    while True:
+        punkti_nimi = input('Sisesta punkti nimi: ')
+        if punkti_nimi in sonastik:
+            return punkti_nimi
+        else:
+            print('Seda punkti ei ole, sisestage teine punkt')
 
-# print(andme_sonastik['punkt2']['grupp'])
-# lisa_sonastikku(andme_sonastik, 'punkt3')
-# muuda_nime(andme_sonastik, 'punkt3', 'Meie pannkoogid')
-# lisa_vajalik_ese(andme_sonastik, 'punkt2', '15 meetrine 16A kaabel', 3)
-#
-# print(andme_sonastik)
-#
-# prindi_punkti_andmed(andme_sonastik, input('Sisesta punkti nimi'))
+
+def uuenda_grupi_vooluvajadust(sonastik):
+    # nulli grupi vooluvajaduse
+    for voti in sonastik:
+        if isinstance(sonastik[voti], dict) and 'grupi vooluvajadus' in sonastik[voti]:
+            sonastik[voti]['grupi vooluvajadus'] = 0
+
+    #arvutab iga grupi vooluvajaduse
+    for punkt, andmed in sonastik.items():
+        if 'grupp' in andmed and andmed['grupp'] in sonastik:
+            grupp = andmed['grupp']
+            sonastik[grupp]['grupi vooluvajadus'] += int(andmed.get('vooluvajadus', 0))
+
+
+def uuenda_grupi_esemeid(sonastik):
+    # nulli grupi vooluvajaduse
+    for voti in sonastik:
+        if isinstance(sonastik[voti], dict) and 'grupi vajalikud esemed' in sonastik[voti]:
+            sonastik[voti]['grupi vajalikud esemed'] = {}
+
+    # arvutab iga grupi vooluvajaduse
+    for punkt, andmed in sonastik.items():
+        if 'grupp' in andmed and andmed['grupp'] in sonastik:
+            grupp = andmed['grupp']
+            for ese, kogus in andmed.get('vajalikud esemed', {}).items():
+                if ese in sonastik[grupp]['grupi vajalikud esemed']:
+                    sonastik[grupp]['grupi vajalikud esemed'][ese] += kogus
+                else:
+                    sonastik[grupp]['grupi vajalikud esemed'][ese] = kogus
+
+
+# def arvuta_vool:
+
+
+andme_sonastik = {}
+
 
 while True:
     sisend = input('Sisesta funktsioon: ')
@@ -98,7 +123,7 @@ while True:
         break
 
     if sisend == 'andmed':
-        prindi_punkti_andmed(andme_sonastik, input('Sisesta punkti nimi: '))
+        prindi_punkti_andmed(andme_sonastik, mis_punkt(andme_sonastik))
 
     if sisend == 'salvesta':
         fnimi = input('Sisesta failinimi: ')
@@ -106,11 +131,16 @@ while True:
             failinimi = fnimi
         salvesta_faili(andme_sonastik, failinimi)
 
+    if sisend == 'impordi':
+        failinimi = input('Sisesta failinimi: ')
+        improdi_kinnitus = input('Oled sa kindel, et soovid sonastiku yle kirjutada? ')
+        if improdi_kinnitus == 'jah':
+            impordi(failinimi)
+
     if sisend == 'lisa_sonastikku':
-        punkti_nimi = input('Mis punkti soovid lisada: ')
-        lisa_sonastikku(andme_sonastik, punkti_nimi)
+        lisa_sonastikku(andme_sonastik, input('Sisestage punkti nimi: '))
     if sisend == 'muuda':
-        punkti_nimi = input('Mis punkti soovid muuta: ')
+        punkti_nimi = mis_punkt(andme_sonastik)
         while True:
             prindi_punkti_andmed(andme_sonastik, punkti_nimi)
             kategooria = input('Mis kategooriat soovid muuta: ')
