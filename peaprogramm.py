@@ -57,7 +57,7 @@ def prindi_punkti_andmed(sonastik, punkti_nimi):
 
 def str_to_koordinaat(koordinaat):
     koordinaadid = [x.strip() for x in koordinaat.split(',')]
-    return (int(koordinaadid[0]), int(koordinaadid[1]))
+    return (float(koordinaadid[0]), float(koordinaadid[1]))
 
 
 def salvesta_faili(sonastik, failinimi):
@@ -116,7 +116,10 @@ def uuenda_grupi_esemeid(sonastik):
 
 andme_sonastik = {}
 
-
+# Käsud on impordi (tuleb vastata "jah", kui soovid importida või ükskõik mida muud, et see katkestada), salvesta, lisa_sonastikku, andmed, muuda. Muuda korral saab pärast punkti valimist kirjutada "all", et muuta kõiki andmeid.
+# Kui kasutad "all", saab jätta mingid andmed sisestamata, vajutades lihtsalt enter.
+# Kui soovid muuta üksikuid andmeid, siis kirjuta "nime", "koordinaate", "gruppi", "vooluvajadust", "kommentaar", "vajalike esemeid".
+# Vajalike esemeid lisades saab lõpetada, vajutades tyhjalt enter. Selleks et lahkuda muutmisest, tuleb kirjutada "break". Selleks, et lõpetada programm, tuleb kirjutada "break"
 while True:
     sisend = input('Sisesta funktsioon: ')
     if sisend == 'break':
@@ -160,7 +163,6 @@ while True:
                 kommentaar = input('Sisesta kommentaar: ')
                 if kommentaar:
                     muuda_kommentaari(andme_sonastik, punkti_nimi, kommentaar)
-                vajalikud_esemed = input('Sisesta vajalikud esemed: ')
                 if vajalikud_esemed:
                     while True:
                         ese = input('Sisesta vajalik ese: ')

@@ -1,0 +1,55 @@
+{
+    "punkt1": {
+        "nimi": "kasitoopood",
+        "koordinaat": [
+            58.3802902,
+            26.7225719
+        ],
+        "grupp": "ylemine",
+        "vooluvajadus": 123,
+        "kommentaar": "see on naide punktist",
+        "vajalikud esemed": {
+            "raha": 2,
+            "toit": 3,
+            "break": 3
+        }
+    },
+    "ylemine": {
+        "grupi vooluvajadus": 690,
+        "grupi vajalikud esemed": {
+            "raha": 7,
+            "toit": 3,
+            "break": 3,
+            "random": 2
+        }
+    },
+    "punkt2": {
+        "nimi": "pahad poisid",
+        "koordinaat": [
+            58.3801103,
+            26.7230011
+        ],
+        "grupp": "alumine",
+        "vooluvajadus": 0,
+        "kommentaar": "see on teine naide",
+        "vajalikud esemed": {}
+    },
+    "alumine": {
+        "grupi vooluvajadus": 0,
+        "grupi vajalikud esemed": {}
+    },
+    "punkt3": {
+        "nimi": "mingi punkt yleval",
+        "koordinaat": [
+            58.380369,
+            26.7229796
+        ],
+        "grupp": "ylemine",
+        "vooluvajadus": 567,
+        "kommentaar": "mingi kommentaar",
+        "vajalikud esemed": {
+            "raha": 5,
+            "random": 2
+        }
+    }
+}
