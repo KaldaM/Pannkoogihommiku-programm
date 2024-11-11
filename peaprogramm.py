@@ -1,4 +1,5 @@
 import json
+import math
 
 
 def lisa_sonastikku(sonastik, punkti_nimi):
@@ -8,6 +9,7 @@ def lisa_sonastikku(sonastik, punkti_nimi):
         'grupp': '',
         'vooluvajadus': 0,
         'kommentaar': '',
+        'värv': '', # ma ei tea veel, mis formaadis see olema peaks.
         'vajalikud esemed': {}
     }
 
@@ -36,6 +38,9 @@ def muuda_vooluvajadust(sonastik, punkti_nimi, vooluvajadus):
 
 def muuda_kommentaari(sonastik, punkti_nimi, kommentaar):
     sonastik[punkti_nimi]['kommentaar'] = kommentaar
+
+def muuda_värvi(sonastik, punkti_nimi, värv):
+    sonastik[punkti_nimi]['värv'] = värv
 
 
 def muuda_vajalike_esemeid(sonastik, punkti_nimi, vajalikud_esemed):
@@ -110,11 +115,39 @@ def uuenda_grupi_esemeid(sonastik):
                 else:
                     sonastik[grupp]['grupi vajalikud esemed'][ese] = kogus
 
+# pole vb vaja, sest math on see sisse-ehitatud
+def moodulint(koordinaat_1, koordinaat_2):
+    return math.dist(koordinaat_1, koordinaat_2)
 
-# def arvuta_vool:
+
+def jada_pikkus(koordinaadid): # koordinaadid on kujul [(x1, y1), (x2, y2)]
+    jada_pikkus = 0.0
+    for i in range (1, len(koordinaadid)):
+        jada_pikkus += math.dist(koordinaadid[i-1], koordinaadid[i])
+    return jada_pikkus
 
 
-andme_sonastik = {}
+def jada_punktinimedega(sonastik, jada_nimi, kapp, punktid):
+    koordinaadid = [sonastik['kapid'][kapp]]
+    for i in punktid:
+        koordinaadid.append(sonastik[i]['koordinaat'])
+
+    pikkus = jada_pikkus(koordinaadid)
+    punktid.insert(0, kapp)
+
+    sonastik[jada_nimi] = {
+        'nimi': jada_nimi,
+        'jada_punktid': punktid,
+        'jada_pikkus': pikkus
+    }
+
+
+andme_sonastik = {
+    'kapid': {
+        'kapp1': [11.23, 25.12],
+        'kapp2': [22.0, 23.0]
+    }
+}
 
 # Käsud on impordi (tuleb vastata "jah", kui soovid importida või ükskõik mida muud, et see katkestada), salvesta, lisa_sonastikku, andmed, muuda. Muuda korral saab pärast punkti valimist kirjutada "all", et muuta kõiki andmeid.
 # Kui kasutad "all", saab jätta mingid andmed sisestamata, vajutades lihtsalt enter.
@@ -139,6 +172,17 @@ while True:
         improdi_kinnitus = input('Oled sa kindel, et soovid sonastiku yle kirjutada? ')
         if improdi_kinnitus == 'jah':
             impordi(failinimi)
+    if sisend == 'punktijada':
+        punktijada = []
+        jadanimi = input('Sisesta jadanimi: ')
+        kapp = input('Sisesta kapi nimi: ')
+        while True:
+            inp = input('Sisesta punkt või vajuta lihtsalt enter: ')
+            if inp:
+                punktijada.append(inp)
+            else:
+                break
+        jada_punktinimedega(andme_sonastik, jadanimi, kapp, punktijada)
 
     if sisend == 'lisa_sonastikku':
         lisa_sonastikku(andme_sonastik, input('Sisestage punkti nimi: '))
@@ -163,13 +207,15 @@ while True:
                 kommentaar = input('Sisesta kommentaar: ')
                 if kommentaar:
                     muuda_kommentaari(andme_sonastik, punkti_nimi, kommentaar)
-                if vajalikud_esemed:
-                    while True:
-                        ese = input('Sisesta vajalik ese: ')
-                        if ese == '':
-                            break
-                        kogus = int(input('Sisesta kogus: '))
-                        lisa_vajalik_ese(andme_sonastik, punkti_nimi, ese, kogus)
+                värv = input('Sisesta värv: ')
+                if värv:
+                    muuda_värvi(andme_sonastik, punkti_nimi, värv)
+                while True:
+                    ese = input('Sisesta vajalik ese: ')
+                    if ese == '':
+                        break
+                    kogus = int(input('Sisesta kogus: '))
+                    lisa_vajalik_ese(andme_sonastik, punkti_nimi, ese, kogus)
                 break
             if kategooria == 'nime':
                 nimi = input('Sisesta nimi: ')
