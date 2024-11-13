@@ -15,6 +15,7 @@
 ##################################################
 
 import tkinter as tk
+from multiprocessing.connection import answer_challenge
 from tkinter import messagebox, filedialog
 from PIL import ImageTk, Image
 import taustafunktsioonid
@@ -49,7 +50,7 @@ class programmi_GUI:
         # juhised kaardi kasutamiseks
         self.kaardijuhis = tk.StringVar()
         self.kaardijuhis.set(
-            "Kaardile vajutades vasakklõps lisab ruudu, paremklõps eemaldab ruudu ja rullikule vajutades muudab see ruudu värvi (kui saadaval)"
+            "Kaardile vajutades vasakklõps lisab ruudu ja paremklõps eemaldab ruudu"
         )
         self.silt = tk.Label(self.root, textvariable=self.kaardijuhis, font=("Arial", 15, "bold"))
         self.silt.pack(padx=15, pady=15, anchor="nw")
@@ -63,11 +64,22 @@ class programmi_GUI:
         self.kaardipilt = ImageTk.PhotoImage(Image.open("kaart.png"))
         self.canvas.create_image(648, 348.5, image=self.kaardipilt)
 
+        # sonastiku printimine, see on ajutine lahendus
+        self.sonastik_tekst = tk.Text(self.root, wrap='word', height=80, width=50)
+        self.sonastik_tekst.place(relx=1.0, rely=0, anchor='ne', relheight=1.0)
+
+        naita_sonastiku_teksti(self)
+
         # Seome sündmused, kasutades lambda't, et edasi anda `self`
         self.canvas.bind("<Button-1>", lambda event: lisa_ruut(self, event))
         self.canvas.bind("<Button-3>", lambda event: eemalda_ruut(self, event))
 
         self.root.mainloop()
+
+
+def naita_sonastiku_teksti(self):
+    self.sonastik_tekst.delete(1.0, tk.END)
+    self.sonastik_tekst.insert(tk.END, json.dumps(sonastik, indent=4))
 
 
 def impordi_sonastik(self):
@@ -81,6 +93,17 @@ def impordi_sonastik(self):
             sonastik.update(andmed)
             print('Andmed imporditud', sonastik)
             uuenda_punktid(self)
+
+    # Leia suurim olemasolev punktinumber ja uuenda punkti_loendur
+    punktinumbrid = [
+        int(key.split('-')[1]) for key in sonastik.keys() if key.startswith("punkt-") and key.split('-')[1].isdigit()
+    ]
+    if punktinumbrid:
+        self.punkti_loendur = max(punktinumbrid) + 1
+    else:
+        self.punkti_loendur = 1  # Alusta uuesti ühest, kui punkte ei leidu
+
+    naita_sonastiku_teksti(self)
 
 
 def expordi_sonastik():
@@ -101,6 +124,8 @@ def uuenda_punktid(self):
             self.canvas.create_rectangle(
                 x - suurus / 2, y - suurus / 2, x + suurus / 2, y + suurus / 2, fill=värv, outline="black", tags=(f'punkt-{el}',"punkt")
             )
+
+    naita_sonastiku_teksti(self)
 
 
 def lisa_ruut(self, event):
@@ -144,6 +169,8 @@ def eemalda_ruut(self, event):
         print("Sõnastik läbitud")
         print(sonastik)
 
+    naita_sonastiku_teksti(self)
+
 
 
 def andme_dialog(self, punkti_nimi, coords, varv):
@@ -176,13 +203,19 @@ def andme_dialog(self, punkti_nimi, coords, varv):
         taustafunktsioonid.muuda_vooluvajadust(sonastik, punkti_nimi, int(vooluvajadus_var.get()) if vooluvajadus_var.get().isdigit() else 0)
         taustafunktsioonid.muuda_kommentaari(sonastik, punkti_nimi, kommentaar_var.get())
         andmete_aken.destroy()  # Sulgeb akna pärast salvestamist
+
+        naita_sonastiku_teksti(self)
         print(sonastik)
 
-    tk.Button(andmete_aken, text="Salvesta", command=salvesta_andmed).grid(row=4, column=0, columnspan=2, pady=10)
+    def tühista():
+        self.canvas.delete(punkti_nimi)
+        if punkti_nimi in sonastik:
+            del sonastik[punkti_nimi]
+        andmete_aken.destroy()
+
+    tk.Button(andmete_aken, text='Salvesta', command=salvesta_andmed).grid(row=4, column=0, padx=5, pady=10)
+    tk.Button(andmete_aken, text='Tühista', command=tühista).grid(row=4,column=1,padx=5,pady=10)
 
 
-
-
-failinimi = ''
 
 programmi_GUI()
