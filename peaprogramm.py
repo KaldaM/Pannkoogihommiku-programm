@@ -5,6 +5,7 @@ def lisa_sonastikku(sonastik, punkti_nimi):
     sonastik[punkti_nimi] = {
         'nimi': '',
         'koordinaat': (),
+        'värv': '',
         'grupp': '',
         'vooluvajadus': 0,
         'kommentaar': '',
@@ -17,6 +18,10 @@ def muuda_nime(sonastik, punkti_nimi, nimi):
 
 def muuda_koordinaate(sonastik, punkti_nimi, koordinaat):
     sonastik[punkti_nimi]['koordinaat'] = koordinaat
+
+
+def muuda_varvi(sonastik, punkti_nimi, varv):
+    sonastik[punkti_nimi]['värv'] = varv
 
 
 def muuda_gruppi(sonastik, punkti_nimi, grupp):
@@ -58,13 +63,14 @@ def lisa_vajalik_ese(sonastik, punkti_nimi, vajalik_ese, kogus = 1):
 #
 # def str_to_koordinaat(koordinaat):
 #     koordinaadid = [x.strip() for x in koordinaat.split(',')]
-#     return (float(koordinaadid[0]), float(koordinaadid[1]))
+#     return (int(koordinaadid[0]), int(koordinaadid[1]))
 
 
 def salvesta_faili(sonastik, failinimi):
     fail = open(failinimi, 'w', encoding='utf-8')
     json.dump(sonastik, fail, ensure_ascii=False, indent=4)
     fail.close
+    print('Salvestati')
 
 
 def impordi(failinimi):
