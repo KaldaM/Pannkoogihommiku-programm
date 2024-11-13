@@ -1,5 +1,21 @@
+################################################
+# Programmeerimine I
+# 2024/2025 sügissemester
+#
+# Projekt
+# Teema: Pannkoogihommiku programm alpha versioon
+#
+#
+# Autorid: Matteus Kalda ja Ott Allik
+#
+# Lisakommentaar (nt käivitusjuhend): Programmis saab hetkel lisada vasaku nupuvajutusega faili, eemaldada, paremanupuvajutusega. Kui lisada punkt,
+# on võimalik sisestada infot selle kohta, aga ei pea. Tuleb vajutada salvesta nuppu. Sõnastiku on võimalik importida ja exportida fail menüü kaudu.
+# Selleks tuleb kasutada .txt failitüüpi.
+#
+##################################################
+
 import tkinter as tk
-from tkinter import messagebox, simpledialog, filedialog
+from tkinter import messagebox, filedialog
 from PIL import ImageTk, Image
 import taustafunktsioonid
 import json
