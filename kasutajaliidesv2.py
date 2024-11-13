@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox, simpledialog, filedialog
 from PIL import ImageTk, Image
-import peaprogramm
+import taustafunktsioonid
 import json
 
 sonastik = {
@@ -72,7 +72,7 @@ def expordi_sonastik():
 
     if salvestuskoht:
         global sonastik
-        peaprogramm.salvesta_faili(sonastik, salvestuskoht)
+        taustafunktsioonid.salvesta_faili(sonastik, salvestuskoht)
 
 
 def uuenda_punktid(self):
@@ -99,7 +99,7 @@ def lisa_ruut(self, event):
     )
 
 
-    peaprogramm.lisa_sonastikku(sonastik, punkti_nimi)
+    taustafunktsioonid.lisa_sonastikku(sonastik, punkti_nimi)
 
     # Kutsume andme dialoogi
     andme_dialog(self, punkti_nimi, (x, y), värv)
@@ -153,12 +153,12 @@ def andme_dialog(self, punkti_nimi, coords, varv):
 
 
     def salvesta_andmed():
-        peaprogramm.muuda_nime(sonastik, punkti_nimi, nimi_var.get())
-        peaprogramm.muuda_koordinaate(sonastik, punkti_nimi, coords)
-        peaprogramm.muuda_varvi(sonastik, punkti_nimi, varv)
-        peaprogramm.muuda_gruppi(sonastik, punkti_nimi, grupp_var.get())
-        peaprogramm.muuda_vooluvajadust(sonastik, punkti_nimi, int(vooluvajadus_var.get()) if vooluvajadus_var.get().isdigit() else 0)
-        peaprogramm.muuda_kommentaari(sonastik, punkti_nimi, kommentaar_var.get())
+        taustafunktsioonid.muuda_nime(sonastik, punkti_nimi, nimi_var.get())
+        taustafunktsioonid.muuda_koordinaate(sonastik, punkti_nimi, coords)
+        taustafunktsioonid.muuda_varvi(sonastik, punkti_nimi, varv)
+        taustafunktsioonid.muuda_gruppi(sonastik, punkti_nimi, grupp_var.get())
+        taustafunktsioonid.muuda_vooluvajadust(sonastik, punkti_nimi, int(vooluvajadus_var.get()) if vooluvajadus_var.get().isdigit() else 0)
+        taustafunktsioonid.muuda_kommentaari(sonastik, punkti_nimi, kommentaar_var.get())
         andmete_aken.destroy()  # Sulgeb akna pärast salvestamist
         print(sonastik)
 
