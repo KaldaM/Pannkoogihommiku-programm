@@ -11,11 +11,11 @@
 # Lisakommentaar (nt käivitusjuhend): Programmis saab hetkel lisada vasaku nupuvajutusega faili, eemaldada, paremanupuvajutusega. Kui lisada punkt,
 # on võimalik sisestada infot selle kohta, aga ei pea. Tuleb vajutada salvesta nuppu. Sõnastiku on võimalik importida ja exportida fail menüü kaudu.
 # Selleks tuleb kasutada .txt failitüüpi.
-#
+# Külje peal on näha sõnastiku, et näha kuidas sisestatud andmed muutuvad. Tulevikus tuleks see parema välimusega ning interaktiivsem
+# Kui punktid kuuluvad samasse gruppi, siis on sõnastikus näha punktide voolu summat.
 ##################################################
 
 import tkinter as tk
-from multiprocessing.connection import answer_challenge
 from tkinter import messagebox, filedialog
 from PIL import ImageTk, Image
 import taustafunktsioonid
@@ -27,7 +27,7 @@ sonastik = {
             'kapp2': [22.0, 23.0]
         }
 }
-class programmi_GUI:
+class ProgrammiGUI:
     def __init__(self):
         self.punkti_loendur = 1
         self.root = tk.Tk()
@@ -218,4 +218,4 @@ def andme_dialog(self, punkti_nimi, coords, varv):
 
 
 
-programmi_GUI()
+ProgrammiGUI()
