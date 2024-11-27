@@ -17,9 +17,20 @@
 
 import tkinter as tk
 from tkinter import messagebox, filedialog
+from tkinter.colorchooser import askcolor
 from PIL import ImageTk, Image
 import taustafunktsioonid
 import json
+
+värvid = {
+    "punane": "#FF0000",
+    "roheline": "#00FF00",
+    "sinine": "#0000FF",
+    "kollane": "#FFFF00",
+    "oranž": "#FFA500",
+    "lilla": "#800080",
+    "must": "#000000",
+}
 
 sonastik = {
     'kapid': {
@@ -50,7 +61,7 @@ class ProgrammiGUI:
         # juhised kaardi kasutamiseks
         self.kaardijuhis = tk.StringVar()
         self.kaardijuhis.set(
-            "Kaardile vajutades vasakklõps lisab ruudu ja paremklõps eemaldab ruudu"
+            "Kaardile vajutades vasakklõps lisab ruudu, paremklõps eemaldab ruudu ja rullikule vajutamine muudab värvi"
         )
         self.silt = tk.Label(self.root, textvariable=self.kaardijuhis, font=("Arial", 15, "bold"))
         self.silt.pack(padx=15, pady=15, anchor="nw")
@@ -73,6 +84,7 @@ class ProgrammiGUI:
         # Seome sündmused, kasutades lambda't, et edasi anda `self`
         self.canvas.bind("<Button-1>", lambda event: lisa_ruut(self, event))
         self.canvas.bind("<Button-3>", lambda event: eemalda_ruut(self, event))
+        self.canvas.bind("<Button-2>", lambda event: muuda_värvi(self, event))
 
         self.root.mainloop()
 
@@ -120,7 +132,7 @@ def uuenda_punktid(self):
         if el.startswith('punkt') and 'koordinaat' in sonastik[el]:
             x, y = sonastik[el]['koordinaat']
             suurus = 10
-            värv = 'red'
+            värv = värvid['punane']
             self.canvas.create_rectangle(
                 x - suurus / 2, y - suurus / 2, x + suurus / 2, y + suurus / 2, fill=värv, outline="black", tags=(f'punkt-{el}',"punkt")
             )
@@ -131,7 +143,7 @@ def uuenda_punktid(self):
 def lisa_ruut(self, event):
     x, y = event.x, event.y  # Koordinaadid, kuhu hiirega vajutati
     suurus = 10  # Ruudu suurus pikslites
-    värv = "red"  # Ruudu värv
+    värv = värvid['punane']  # Ruudu värv, punane
 
     punkti_nimi = 'punkt-' + str(self.punkti_loendur)
     # Joonista punkt (ruut) klikitud kohta
@@ -143,7 +155,7 @@ def lisa_ruut(self, event):
     taustafunktsioonid.lisa_sonastikku(sonastik, punkti_nimi)
 
     # Kutsume andme dialoogi
-    andme_dialog(self, punkti_nimi, (x, y), värv)
+    andme_dialog(self, punkti_nimi, (x, y), "punane")
 
     self.punkti_loendur += 1
 
@@ -158,7 +170,7 @@ def eemalda_ruut(self, event):
     try:
         for el in sonastik:
             if el.startswith('punkt') and punktikese == tuple(sonastik[el]["koordinaat"]):
-                if messagebox.askyesno(title='Kustuta?', message=f'Kas oled kindel, et soovid {sonastik[el]['nimi']} eemaldada?'):
+                if messagebox.askyesno(title='Kustuta?', message=f"Kas oled kindel, et soovid {sonastik[el]['nimi']} eemaldada?"):
                     # Eemalda ruut lõuendilt ja sõnastikust
                     self.canvas.delete(kustutatav)
                     print(f"Ruut on eemaldatud asukohast: x={sonastik[el]['koordinaat'][0]}, y={sonastik[el]['koordinaat'][1]}")
@@ -170,6 +182,48 @@ def eemalda_ruut(self, event):
         print(sonastik)
 
     naita_sonastiku_teksti(self)
+
+def muuda_värvi(self, event):
+    # Leia objekt ruudul
+    vajutatud_punkt = self.canvas.find_closest(event.x, event.y)[0]
+
+
+
+    def punkti_värvimine(vajutatud_punkt, värv):
+        self.canvas.itemconfig(vajutatud_punkt, fill=värv)
+
+        # Et panna punkt sõnastikku, arvutab järgnev kood ruudu, mille järel arvutab kohe ruudu keskme
+        vajutatud_punkt = self.canvas.coords(vajutatud_punkt)
+        punktikese_x = (vajutatud_punkt[0] + vajutatud_punkt[2]) / 2
+        punktikese_y = (vajutatud_punkt[1] + vajutatud_punkt[3]) / 2
+        punktikese = (int(punktikese_x), int(punktikese_y))
+        # Õige punkti leidmine sõnastikust
+        for el in sonastik:
+            if el.startswith('punkt') and punktikese == tuple(sonastik[el]["koordinaat"]):
+                värvitud_el = el
+        # Punkt pannakse sõnastikku
+        taustafunktsioonid.muuda_varvi(sonastik, värvitud_el, list(värvid.keys())[list(värvid.values()).index(värv)])
+
+    värvipalett(vajutatud_punkt, punkti_värvimine)
+
+def värvipalett(vajutatud_punkt, callback):
+    # callback funktsioon, et saaks värvi väärtuse saata funktsiooni punkti_värvimine
+    def vali_värv(valitud_värv):
+        print(f"Valitud värv: {valitud_värv}")
+        leht.destroy()
+        callback(vajutatud_punkt, valitud_värv)
+
+    # Uue akna loomine
+    leht = tk.Toplevel()
+    leht.title("Vali värv")
+
+    tk.Label(leht, text="Vali värv:").pack(pady=5)
+
+    # Värvivaliku ettemanamine
+    for värv in värvid:
+        värvinupp = tk.Button(leht, bg=värvid[värv], width=10, command=lambda nupp=värvid[värv]: vali_värv(nupp))
+        värvinupp.pack(pady=2)
+
 
 
 
@@ -193,7 +247,6 @@ def andme_dialog(self, punkti_nimi, coords, varv):
     tk.Label(andmete_aken, text="Kommentaar:").grid(row=3, column=0, padx=5, pady=5)
     kommentaar_var = tk.Entry(andmete_aken)
     kommentaar_var.grid(row=3, column=1, padx=5, pady=5)
-
 
     def salvesta_andmed():
         taustafunktsioonid.muuda_nime(sonastik, punkti_nimi, nimi_var.get())
