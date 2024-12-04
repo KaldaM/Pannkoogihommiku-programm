@@ -18,19 +18,11 @@
 import tkinter as tk
 from tkinter import messagebox, filedialog
 from tkinter.colorchooser import askcolor
+from tkinter import ttk
 from PIL import ImageTk, Image
 import taustafunktsioonid
 import json
 
-värvid = {
-    "punane": "#FF0000",
-    "roheline": "#00FF00",
-    "sinine": "#0000FF",
-    "kollane": "#FFFF00",
-    "oranž": "#FFA500",
-    "lilla": "#800080",
-    "must": "#000000",
-}
 
 sonastik = {
     'kapid': {
@@ -38,6 +30,8 @@ sonastik = {
             'kapp2': [22.0, 23.0]
         }
 }
+
+
 class ProgrammiGUI:
     def __init__(self):
         self.punkti_loendur = 1
@@ -75,22 +69,40 @@ class ProgrammiGUI:
         self.kaardipilt = ImageTk.PhotoImage(Image.open("kaart.png"))
         self.canvas.create_image(648, 348.5, image=self.kaardipilt)
 
-        # sonastiku printimine, see on ajutine lahendus
-        self.sonastik_tekst = tk.Text(self.root, wrap='word', height=80, width=50)
-        self.sonastik_tekst.place(relx=1.0, rely=0, anchor='ne', relheight=1.0)
+        # Treeview info kuvamiseks
+        self.tree = ttk.Treeview(self.root)
+        self.tree.place(relx=1.0, rely=0, anchor='ne', relheight=1.0, width=400)
+        self.tree.heading("#0", text="Sõnastik", anchor="w")
+        self.uuenda_sonastiku_puu()
 
-        self.naita_sonastiku_teksti()
 
         # Seome sündmused, kasutades lambda't, et edasi anda `self`
         self.canvas.bind("<Button-1>", self.lisa_ruut)
         self.canvas.bind("<Button-3>", self.eemalda_ruut)
+        self.canvas.bind("<Button-2>", self.muuda_ruudu_varvi)
 
         self.root.mainloop()
 
+    def uuenda_sonastiku_puu(self):
+        # Tühjenda eelnev TreeView
+        self.tree.delete(*self.tree.get_children())
 
-    def naita_sonastiku_teksti(self):
-        self.sonastik_tekst.delete(1.0, tk.END)
-        self.sonastik_tekst.insert(tk.END, json.dumps(sonastik, indent=4))
+        for grupp, andmed in sonastik.items():
+            # Lisa grupid (nt kapid, punktid jne)
+            grupp_id = self.tree.insert("", "end", text=grupp, open=True)
+            if isinstance(andmed, dict):
+                for punkt, detailid in andmed.items():
+                    if isinstance(detailid, dict):
+                        punkt_tekst = f"{punkt} - Vool: {detailid.get('vooluvajadus', 0)}A"
+                        punkt_id = self.tree.insert(grupp_id, "end", text=punkt_tekst)
+
+                        # Lisa värvi-indikaator
+                        varv = detailid.get('värv', '#FFFFFF')
+                        self.tree.item(punkt_id, tags=(varv,))
+        # Lisa värvi-stiilid
+        self.tree.tag_configure("#FF0000", background="#FFCCCC")  # Punane
+        self.tree.tag_configure("#00FF00", background="#CCFFCC")  # Roheline
+        self.tree.tag_configure("#0000FF", background="#CCCCFF")  # Sinine
 
 
     def impordi_sonastik(self):
@@ -114,7 +126,7 @@ class ProgrammiGUI:
         else:
             self.punkti_loendur = 1  # Alusta uuesti ühest, kui punkte ei leidu
 
-        self.naita_sonastiku_teksti()
+        self.uuenda_sonastiku_puu()
 
 
     def expordi_sonastik(self):
@@ -124,25 +136,24 @@ class ProgrammiGUI:
             global sonastik
             taustafunktsioonid.salvesta_faili(sonastik, salvestuskoht)
 
-
     def uuenda_punktid(self):
         self.canvas.delete('punkt')
         for el in sonastik:
             if el.startswith('punkt') and 'koordinaat' in sonastik[el]:
                 x, y = sonastik[el]['koordinaat']
                 suurus = 10
-                värv = värvid['punane']
+                värv = sonastik[el].get('värv', "#FF0000")  # Kasuta sõnastikust leitavat värvi või vaikimisi punast
                 self.canvas.create_rectangle(
-                    x - suurus / 2, y - suurus / 2, x + suurus / 2, y + suurus / 2, fill=värv, outline="black", tags=(f'punkt-{el}',"punkt")
+                    x - suurus / 2, y - suurus / 2, x + suurus / 2, y + suurus / 2,
+                    fill=värv, outline="black", tags=(f'punkt-{el}', "punkt")
                 )
 
-        self.naita_sonastiku_teksti()
-
+        self.uuenda_sonastiku_puu()
 
     def lisa_ruut(self, event):
         x, y = event.x, event.y  # Koordinaadid, kuhu hiirega vajutati
         suurus = 10  # Ruudu suurus pikslites
-        värv = värvid['punane']  # Ruudu värv, punane
+        värv = "#FF0000"  # Ruudu värv, punane
 
         punkti_nimi = 'punkt-' + str(self.punkti_loendur)
         # Joonista punkt (ruut) klikitud kohta
@@ -154,7 +165,7 @@ class ProgrammiGUI:
         taustafunktsioonid.lisa_sonastikku(sonastik, punkti_nimi)
 
         # Kutsume andme dialoogi
-        self.andme_dialog(punkti_nimi, (x, y), "punane")
+        self.andme_dialog(punkti_nimi, (x, y), "#FF0000")
 
         self.punkti_loendur += 1
 
@@ -180,7 +191,32 @@ class ProgrammiGUI:
             print("Sõnastik läbitud")
             print(sonastik)
 
-        self.naita_sonastiku_teksti()
+        self.uuenda_sonastiku_puu()
+
+
+    def muuda_ruudu_varvi(self, event):
+        # Leia ruut, millel klikiti
+        valitud_ruut = self.canvas.find_closest(event.x, event.y)[0]
+        ruudu_koordinaadid = self.canvas.coords(valitud_ruut)
+        punktikese_x = (ruudu_koordinaadid[0] + ruudu_koordinaadid[2]) / 2
+        punktikese_y = (ruudu_koordinaadid[1] + ruudu_koordinaadid[3]) / 2
+        punktikese = (int(punktikese_x), int(punktikese_y))
+
+        # Leia vastav punkt sõnastikust
+        for el in sonastik:
+            if el.startswith('punkt') and punktikese == tuple(sonastik[el]["koordinaat"]):
+                # Küsi uus värv
+                uus_varv = askcolor(title="Vali ruudu värv")[1]  # [1] annab hex väärtuse
+                if uus_varv:
+                    # Uuenda lõuendil ruudu värv
+                    self.canvas.itemconfig(valitud_ruut, fill=uus_varv)
+
+                    # Uuenda sõnastikus värv
+                    taustafunktsioonid.muuda_varvi(sonastik, el, uus_varv)
+                    break
+
+        # Värskenda sõnastiku kuvamist
+        self.uuenda_sonastiku_puu()
 
 
     def andme_dialog(self, punkti_nimi, coords, varv):
@@ -213,7 +249,7 @@ class ProgrammiGUI:
             taustafunktsioonid.muuda_kommentaari(sonastik, punkti_nimi, kommentaar_var.get())
             andmete_aken.destroy()  # Sulgeb akna pärast salvestamist
 
-            self.naita_sonastiku_teksti()
+            self.uuenda_sonastiku_puu()
             print(sonastik)
 
         def tühista():
