@@ -62,7 +62,6 @@ def salvesta_faili(sonastik, failinimi):
     fail.close
     print('Salvestati')
 
-
 def impordi(failinimi):
     with open(failinimi, 'r', encoding='utf-8') as fail:
         global sonastik

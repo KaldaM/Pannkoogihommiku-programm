@@ -51,8 +51,8 @@ class ProgrammiGUI:
 
         self.filemenu = tk.Menu(self.menubar, tearoff=0)
         self.filemenu.add_command(label='Close', command=exit)
-        self.filemenu.add_command(label='Impordi', command=lambda: impordi_sonastik(self))
-        self.filemenu.add_command(label='Salvesta', command =expordi_sonastik)
+        self.filemenu.add_command(label='Impordi', command=self.impordi_sonastik)
+        self.filemenu.add_command(label='Salvesta', command =self.expordi_sonastik)
 
         self.menubar.add_cascade(menu=self.filemenu, label='File')
 
@@ -79,195 +79,151 @@ class ProgrammiGUI:
         self.sonastik_tekst = tk.Text(self.root, wrap='word', height=80, width=50)
         self.sonastik_tekst.place(relx=1.0, rely=0, anchor='ne', relheight=1.0)
 
-        naita_sonastiku_teksti(self)
+        self.naita_sonastiku_teksti()
 
         # Seome sündmused, kasutades lambda't, et edasi anda `self`
-        self.canvas.bind("<Button-1>", lambda event: lisa_ruut(self, event))
-        self.canvas.bind("<Button-3>", lambda event: eemalda_ruut(self, event))
-        self.canvas.bind("<Button-2>", lambda event: muuda_värvi(self, event))
+        self.canvas.bind("<Button-1>", self.lisa_ruut)
+        self.canvas.bind("<Button-3>", self.eemalda_ruut)
 
         self.root.mainloop()
 
 
-def naita_sonastiku_teksti(self):
-    self.sonastik_tekst.delete(1.0, tk.END)
-    self.sonastik_tekst.insert(tk.END, json.dumps(sonastik, indent=4))
+    def naita_sonastiku_teksti(self):
+        self.sonastik_tekst.delete(1.0, tk.END)
+        self.sonastik_tekst.insert(tk.END, json.dumps(sonastik, indent=4))
 
 
-def impordi_sonastik(self):
-    failitee = filedialog.askopenfilename(title='Vali fail', filetypes=[('txt failid', '*.txt'), ('All Files', '.*')])
+    def impordi_sonastik(self):
+        failitee = filedialog.askopenfilename(title='Vali fail', filetypes=[('txt failid', '*.txt'), ('All Files', '.*')])
 
-    if failitee:
-        with open(failitee, 'r', encoding='utf-8') as fail:
-            andmed = json.load(fail)
+        if failitee:
+            with open(failitee, 'r', encoding='utf-8') as fail:
+                andmed = json.load(fail)
+                global sonastik
+                sonastik.clear()
+                sonastik.update(andmed)
+                print('Andmed imporditud', sonastik)
+                self.uuenda_punktid()
+
+        # Leia suurim olemasolev punktinumber ja uuenda punkti_loendur
+        punktinumbrid = [
+            int(key.split('-')[1]) for key in sonastik.keys() if key.startswith("punkt-") and key.split('-')[1].isdigit()
+        ]
+        if punktinumbrid:
+            self.punkti_loendur = max(punktinumbrid) + 1
+        else:
+            self.punkti_loendur = 1  # Alusta uuesti ühest, kui punkte ei leidu
+
+        self.naita_sonastiku_teksti()
+
+
+    def expordi_sonastik(self):
+        salvestuskoht = filedialog.askopenfilename(title='Vali fail', filetypes=[('txt failid', '*.txt'), ('All Files', '.*')])
+
+        if salvestuskoht:
             global sonastik
-            sonastik.clear()
-            sonastik.update(andmed)
-            print('Andmed imporditud', sonastik)
-            uuenda_punktid(self)
-
-    # Leia suurim olemasolev punktinumber ja uuenda punkti_loendur
-    punktinumbrid = [
-        int(key.split('-')[1]) for key in sonastik.keys() if key.startswith("punkt-") and key.split('-')[1].isdigit()
-    ]
-    if punktinumbrid:
-        self.punkti_loendur = max(punktinumbrid) + 1
-    else:
-        self.punkti_loendur = 1  # Alusta uuesti ühest, kui punkte ei leidu
-
-    naita_sonastiku_teksti(self)
+            taustafunktsioonid.salvesta_faili(sonastik, salvestuskoht)
 
 
-def expordi_sonastik():
-    salvestuskoht = filedialog.askopenfilename(title='Vali fail', filetypes=[('txt failid', '*.txt'), ('All Files', '.*')])
-
-    if salvestuskoht:
-        global sonastik
-        taustafunktsioonid.salvesta_faili(sonastik, salvestuskoht)
-
-
-def uuenda_punktid(self):
-    self.canvas.delete('punkt')
-    for el in sonastik:
-        if el.startswith('punkt') and 'koordinaat' in sonastik[el]:
-            x, y = sonastik[el]['koordinaat']
-            suurus = 10
-            värv = värvid['punane']
-            self.canvas.create_rectangle(
-                x - suurus / 2, y - suurus / 2, x + suurus / 2, y + suurus / 2, fill=värv, outline="black", tags=(f'punkt-{el}',"punkt")
-            )
-
-    naita_sonastiku_teksti(self)
-
-
-def lisa_ruut(self, event):
-    x, y = event.x, event.y  # Koordinaadid, kuhu hiirega vajutati
-    suurus = 10  # Ruudu suurus pikslites
-    värv = värvid['punane']  # Ruudu värv, punane
-
-    punkti_nimi = 'punkt-' + str(self.punkti_loendur)
-    # Joonista punkt (ruut) klikitud kohta
-    self.canvas.create_rectangle(
-        x - suurus / 2, y - suurus / 2, x + suurus / 2, y + suurus / 2, fill=värv, outline="black", tags=(punkti_nimi, 'punkt')
-    )
-
-
-    taustafunktsioonid.lisa_sonastikku(sonastik, punkti_nimi)
-
-    # Kutsume andme dialoogi
-    andme_dialog(self, punkti_nimi, (x, y), "punane")
-
-    self.punkti_loendur += 1
-
-
-def eemalda_ruut(self, event):
-    # Leia objekt ruudul, millele paremklõps tehti (arvutab ruudu, mille järel arvutab kohe ruudu keskme)
-    kustutatav = self.canvas.find_closest(event.x, event.y)[0]
-    vajutatud_punkt = self.canvas.coords(kustutatav)
-    punktikese_x = (vajutatud_punkt[0] + vajutatud_punkt[2]) / 2
-    punktikese_y = (vajutatud_punkt[1] + vajutatud_punkt[3]) / 2
-    punktikese = (int(punktikese_x), int(punktikese_y))
-    try:
+    def uuenda_punktid(self):
+        self.canvas.delete('punkt')
         for el in sonastik:
-            if el.startswith('punkt') and punktikese == tuple(sonastik[el]["koordinaat"]):
-                if messagebox.askyesno(title='Kustuta?', message=f"Kas oled kindel, et soovid {sonastik[el]['nimi']} eemaldada?"):
-                    # Eemalda ruut lõuendilt ja sõnastikust
-                    self.canvas.delete(kustutatav)
-                    print(f"Ruut on eemaldatud asukohast: x={sonastik[el]['koordinaat'][0]}, y={sonastik[el]['koordinaat'][1]}")
-                    del sonastik[el]
-                    break
+            if el.startswith('punkt') and 'koordinaat' in sonastik[el]:
+                x, y = sonastik[el]['koordinaat']
+                suurus = 10
+                värv = värvid['punane']
+                self.canvas.create_rectangle(
+                    x - suurus / 2, y - suurus / 2, x + suurus / 2, y + suurus / 2, fill=värv, outline="black", tags=(f'punkt-{el}',"punkt")
+                )
 
-    except:
-        print("Sõnastik läbitud")
-        print(sonastik)
-
-    naita_sonastiku_teksti(self)
-
-def muuda_värvi(self, event):
-    # Leia objekt ruudul
-    vajutatud_punkt = self.canvas.find_closest(event.x, event.y)[0]
+        self.naita_sonastiku_teksti()
 
 
+    def lisa_ruut(self, event):
+        x, y = event.x, event.y  # Koordinaadid, kuhu hiirega vajutati
+        suurus = 10  # Ruudu suurus pikslites
+        värv = värvid['punane']  # Ruudu värv, punane
 
-    def punkti_värvimine(vajutatud_punkt, värv):
-        self.canvas.itemconfig(vajutatud_punkt, fill=värv)
+        punkti_nimi = 'punkt-' + str(self.punkti_loendur)
+        # Joonista punkt (ruut) klikitud kohta
+        self.canvas.create_rectangle(
+            x - suurus / 2, y - suurus / 2, x + suurus / 2, y + suurus / 2, fill=värv, outline="black", tags=(punkti_nimi, 'punkt')
+        )
 
-        # Et panna punkt sõnastikku, arvutab järgnev kood ruudu, mille järel arvutab kohe ruudu keskme
-        vajutatud_punkt = self.canvas.coords(vajutatud_punkt)
+
+        taustafunktsioonid.lisa_sonastikku(sonastik, punkti_nimi)
+
+        # Kutsume andme dialoogi
+        self.andme_dialog(punkti_nimi, (x, y), "punane")
+
+        self.punkti_loendur += 1
+
+
+    def eemalda_ruut(self, event):
+        # Leia objekt ruudul, millele paremklõps tehti (arvutab ruudu, mille järel arvutab kohe ruudu keskme)
+        kustutatav = self.canvas.find_closest(event.x, event.y)[0]
+        vajutatud_punkt = self.canvas.coords(kustutatav)
         punktikese_x = (vajutatud_punkt[0] + vajutatud_punkt[2]) / 2
         punktikese_y = (vajutatud_punkt[1] + vajutatud_punkt[3]) / 2
         punktikese = (int(punktikese_x), int(punktikese_y))
-        # Õige punkti leidmine sõnastikust
-        for el in sonastik:
-            if el.startswith('punkt') and punktikese == tuple(sonastik[el]["koordinaat"]):
-                värvitud_el = el
-        # Punkt pannakse sõnastikku
-        taustafunktsioonid.muuda_varvi(sonastik, värvitud_el, list(värvid.keys())[list(värvid.values()).index(värv)])
+        try:
+            for el in sonastik:
+                if el.startswith('punkt') and punktikese == tuple(sonastik[el]["koordinaat"]):
+                    if messagebox.askyesno(title='Kustuta?', message=f"Kas oled kindel, et soovid {sonastik[el]['nimi']} eemaldada?"):
+                        # Eemalda ruut lõuendilt ja sõnastikust
+                        self.canvas.delete(kustutatav)
+                        print(f"Ruut on eemaldatud asukohast: x={sonastik[el]['koordinaat'][0]}, y={sonastik[el]['koordinaat'][1]}")
+                        del sonastik[el]
+                        break
 
-    värvipalett(vajutatud_punkt, punkti_värvimine)
+        except:
+            print("Sõnastik läbitud")
+            print(sonastik)
 
-def värvipalett(vajutatud_punkt, callback):
-    # callback funktsioon, et saaks värvi väärtuse saata funktsiooni punkti_värvimine
-    def vali_värv(valitud_värv):
-        print(f"Valitud värv: {valitud_värv}")
-        leht.destroy()
-        callback(vajutatud_punkt, valitud_värv)
-
-    # Uue akna loomine
-    leht = tk.Toplevel()
-    leht.title("Vali värv")
-
-    tk.Label(leht, text="Vali värv:").pack(pady=5)
-
-    # Värvivaliku ettemanamine
-    for värv in värvid:
-        värvinupp = tk.Button(leht, bg=värvid[värv], width=10, command=lambda nupp=värvid[värv]: vali_värv(nupp))
-        värvinupp.pack(pady=2)
+        self.naita_sonastiku_teksti()
 
 
+    def andme_dialog(self, punkti_nimi, coords, varv):
+        andmete_aken = tk.Toplevel(self.root)
+        andmete_aken.title('Sisesta andmed')
 
+        # Loome sildid ja sisestusväljad
+        tk.Label(andmete_aken, text="Nimi:").grid(row=0, column=0, padx=5, pady=5)
+        nimi_var = tk.Entry(andmete_aken)
+        nimi_var.grid(row=0, column=1, padx=5, pady=5)
 
-def andme_dialog(self, punkti_nimi, coords, varv):
-    andmete_aken = tk.Toplevel(self.root)
-    andmete_aken.title('Sisesta andmed')
+        tk.Label(andmete_aken, text="Grupp:").grid(row=1, column=0, padx=5, pady=5)
+        grupp_var = tk.Entry(andmete_aken)
+        grupp_var.grid(row=1, column=1, padx=5, pady=5)
 
-    # Loome sildid ja sisestusväljad
-    tk.Label(andmete_aken, text="Nimi:").grid(row=0, column=0, padx=5, pady=5)
-    nimi_var = tk.Entry(andmete_aken)
-    nimi_var.grid(row=0, column=1, padx=5, pady=5)
+        tk.Label(andmete_aken, text="Vooluvajadus:").grid(row=2, column=0, padx=5, pady=5)
+        vooluvajadus_var = tk.Entry(andmete_aken)
+        vooluvajadus_var.grid(row=2, column=1, padx=5, pady=5)
 
-    tk.Label(andmete_aken, text="Grupp:").grid(row=1, column=0, padx=5, pady=5)
-    grupp_var = tk.Entry(andmete_aken)
-    grupp_var.grid(row=1, column=1, padx=5, pady=5)
+        tk.Label(andmete_aken, text="Kommentaar:").grid(row=3, column=0, padx=5, pady=5)
+        kommentaar_var = tk.Entry(andmete_aken)
+        kommentaar_var.grid(row=3, column=1, padx=5, pady=5)
 
-    tk.Label(andmete_aken, text="Vooluvajadus:").grid(row=2, column=0, padx=5, pady=5)
-    vooluvajadus_var = tk.Entry(andmete_aken)
-    vooluvajadus_var.grid(row=2, column=1, padx=5, pady=5)
+        def salvesta_andmed():
+            taustafunktsioonid.muuda_nime(sonastik, punkti_nimi, nimi_var.get())
+            taustafunktsioonid.muuda_koordinaate(sonastik, punkti_nimi, coords)
+            taustafunktsioonid.muuda_varvi(sonastik, punkti_nimi, varv)
+            taustafunktsioonid.muuda_gruppi(sonastik, punkti_nimi, grupp_var.get())
+            taustafunktsioonid.muuda_vooluvajadust(sonastik, punkti_nimi, int(vooluvajadus_var.get()) if vooluvajadus_var.get().isdigit() else 0)
+            taustafunktsioonid.muuda_kommentaari(sonastik, punkti_nimi, kommentaar_var.get())
+            andmete_aken.destroy()  # Sulgeb akna pärast salvestamist
 
-    tk.Label(andmete_aken, text="Kommentaar:").grid(row=3, column=0, padx=5, pady=5)
-    kommentaar_var = tk.Entry(andmete_aken)
-    kommentaar_var.grid(row=3, column=1, padx=5, pady=5)
+            self.naita_sonastiku_teksti()
+            print(sonastik)
 
-    def salvesta_andmed():
-        taustafunktsioonid.muuda_nime(sonastik, punkti_nimi, nimi_var.get())
-        taustafunktsioonid.muuda_koordinaate(sonastik, punkti_nimi, coords)
-        taustafunktsioonid.muuda_varvi(sonastik, punkti_nimi, varv)
-        taustafunktsioonid.muuda_gruppi(sonastik, punkti_nimi, grupp_var.get())
-        taustafunktsioonid.muuda_vooluvajadust(sonastik, punkti_nimi, int(vooluvajadus_var.get()) if vooluvajadus_var.get().isdigit() else 0)
-        taustafunktsioonid.muuda_kommentaari(sonastik, punkti_nimi, kommentaar_var.get())
-        andmete_aken.destroy()  # Sulgeb akna pärast salvestamist
+        def tühista():
+            self.canvas.delete(punkti_nimi)
+            if punkti_nimi in sonastik:
+                del sonastik[punkti_nimi]
+            andmete_aken.destroy()
 
-        naita_sonastiku_teksti(self)
-        print(sonastik)
-
-    def tühista():
-        self.canvas.delete(punkti_nimi)
-        if punkti_nimi in sonastik:
-            del sonastik[punkti_nimi]
-        andmete_aken.destroy()
-
-    tk.Button(andmete_aken, text='Salvesta', command=salvesta_andmed).grid(row=4, column=0, padx=5, pady=10)
-    tk.Button(andmete_aken, text='Tühista', command=tühista).grid(row=4,column=1,padx=5,pady=10)
+        tk.Button(andmete_aken, text='Salvesta', command=salvesta_andmed).grid(row=4, column=0, padx=5, pady=10)
+        tk.Button(andmete_aken, text='Tühista', command=tühista).grid(row=4,column=1,padx=5,pady=10)
 
 
 
