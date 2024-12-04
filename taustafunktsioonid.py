@@ -56,16 +56,6 @@ def lisa_vajalik_ese(sonastik, punkti_nimi, vajalik_ese, kogus = 1):
     uuenda_grupi_esemeid(sonastik)
 
 
-# def prindi_punkti_andmed(sonastik, punkti_nimi):
-#     for kategooria in sonastik[punkti_nimi]:
-#         print(f'{kategooria}: {sonastik[punkti_nimi][kategooria]}')
-#
-#
-# def str_to_koordinaat(koordinaat):
-#     koordinaadid = [x.strip() for x in koordinaat.split(',')]
-#     return (int(koordinaadid[0]), int(koordinaadid[1]))
-
-
 def salvesta_faili(sonastik, failinimi):
     fail = open(failinimi, 'w', encoding='utf-8')
     json.dump(sonastik, fail, ensure_ascii=False, indent=4)
@@ -77,15 +67,6 @@ def impordi(failinimi):
     with open(failinimi, 'r', encoding='utf-8') as fail:
         global sonastik
         sonastik = json.load(fail)
-
-
-# def mis_punkt(sonastik):
-#     while True:
-#         punkti_nimi = input('Sisesta punkti nimi: ')
-#         if punkti_nimi in sonastik:
-#             return punkti_nimi
-#         else:
-#             print('Seda punkti ei ole, sisestage teine punkt')
 
 
 def uuenda_grupi_vooluvajadust(sonastik):
@@ -116,96 +97,3 @@ def uuenda_grupi_esemeid(sonastik):
                     sonastik[grupp]['grupi vajalikud esemed'][ese] += kogus
                 else:
                     sonastik[grupp]['grupi vajalikud esemed'][ese] = kogus
-
-
-# def arvuta_vool:
-
-
-# andme_sonastik = {}
-#
-# # Käsud on impordi (tuleb vastata "jah", kui soovid importida või ükskõik mida muud, et see katkestada), salvesta, lisa_sonastikku, andmed, muuda. Muuda korral saab pärast punkti valimist kirjutada "all", et muuta kõiki andmeid.
-# # Kui kasutad "all", saab jätta mingid andmed sisestamata, vajutades lihtsalt enter.
-# # Kui soovid muuta üksikuid andmeid, siis kirjuta "nime", "koordinaate", "gruppi", "vooluvajadust", "kommentaar", "vajalike esemeid".
-# # Vajalike esemeid lisades saab lõpetada, vajutades tyhjalt enter. Selleks et lahkuda muutmisest, tuleb kirjutada "break". Selleks, et lõpetada programm, tuleb kirjutada "break"
-# while True:
-#     sisend = input('Sisesta funktsioon: ')
-#     if sisend == 'break':
-#         break
-#
-#     if sisend == 'andmed':
-#         prindi_punkti_andmed(andme_sonastik, mis_punkt(andme_sonastik))
-#
-#     if sisend == 'salvesta':
-#         fnimi = input('Sisesta failinimi: ')
-#         if fnimi:
-#             failinimi = fnimi
-#         salvesta_faili(andme_sonastik, failinimi)
-#
-#     if sisend == 'impordi':
-#         failinimi = input('Sisesta failinimi: ')
-#         improdi_kinnitus = input('Oled sa kindel, et soovid sonastiku yle kirjutada? ')
-#         if improdi_kinnitus == 'jah':
-#             impordi(failinimi)
-#
-#     if sisend == 'lisa_sonastikku':
-#         lisa_sonastikku(andme_sonastik, input('Sisestage punkti nimi: '))
-#     if sisend == 'muuda':
-#         punkti_nimi = mis_punkt(andme_sonastik)
-#         while True:
-#             prindi_punkti_andmed(andme_sonastik, punkti_nimi)
-#             kategooria = input('Mis kategooriat soovid muuta: ')
-#             if kategooria == 'all':
-#                 nimi = input('Sisesta nimi: ')
-#                 if nimi:
-#                     muuda_nime(andme_sonastik, punkti_nimi, nimi)
-#                 koordinaat = input('Sisesta koordinaadid: ')
-#                 if koordinaat:
-#                     muuda_koodinaate(andme_sonastik, punkti_nimi, str_to_koordinaat(koordinaat))
-#                 grupp = input('Sisesta grupi nimi: ')
-#                 if grupp:
-#                     muuda_gruppi(andme_sonastik, punkti_nimi, grupp)
-#                 vooluvajadus = input('Sisesta vooluvajadus: ')
-#                 if vooluvajadus:
-#                     muuda_vooluvajadust(andme_sonastik, punkti_nimi, int(vooluvajadus))
-#                 kommentaar = input('Sisesta kommentaar: ')
-#                 if kommentaar:
-#                     muuda_kommentaari(andme_sonastik, punkti_nimi, kommentaar)
-#                     while True:
-#                         ese = input('Sisesta vajalik ese: ')
-#                         if ese == '':
-#                             break
-#                         kogus = int(input('Sisesta kogus: '))
-#                         lisa_vajalik_ese(andme_sonastik, punkti_nimi, ese, kogus)
-#                 break
-#             if kategooria == 'nime':
-#                 nimi = input('Sisesta nimi: ')
-#                 if nimi:
-#                     muuda_nime(andme_sonastik, punkti_nimi, nimi)
-#             if kategooria == 'koordinaate':
-#                 koordinaat = input('Sisesta koordinaadid: ')
-#                 if koordinaat:
-#                     muuda_koodinaate(andme_sonastik, punkti_nimi, str_to_koordinaat(koordinaat))
-#             if kategooria == 'gruppi':
-#                 grupp = input('Sisesta grupi nimi: ')
-#                 if grupp:
-#                     muuda_gruppi(andme_sonastik, punkti_nimi, grupp)
-#             if kategooria == 'vooluvajadust':
-#                 vooluvajadus = input('Sisesta vooluvajadus: ')
-#                 if vooluvajadus:
-#                     muuda_vooluvajadust(andme_sonastik, punkti_nimi, int(vooluvajadus))
-#             if kategooria == 'kommentaar':
-#                 kommentaar = input('Sisesta kommentaar: ')
-#                 if kommentaar:
-#                     muuda_kommentaari(andme_sonastik, punkti_nimi, kommentaar)
-#             if kategooria == 'vajalike esemeid':
-#                     while True:
-#                         ese = input('Sisesta vajalik ese: ')
-#                         if ese == 'break':
-#                             break
-#                         kogus = int(input('Sisesta kogus: '))
-#                         lisa_vajalik_ese(andme_sonastik, punkti_nimi, ese, kogus)
-#
-#             if kategooria == 'break':
-#                 break
-#             else:
-#                 print('Sellist kategooriat pole')
