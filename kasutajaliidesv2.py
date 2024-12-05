@@ -100,8 +100,12 @@ class ProgrammiGUI:
                 vool = andmed.get("vooluvajadus", 0)
                 punkt_tekst = f"{nimi} - Vool: {vool}W"
 
+                # Määra punkti värv
+                värv = andmed.get("värv", "#FFFFFF")
+                self.tree.tag_configure(punkt_id, background=värv)  # Lisa taustavärv
+
                 punkt_node = self.tree.insert(
-                    grupi_node_id[grupp], "end", text=punkt_tekst, iid=punkt_id
+                    grupi_node_id[grupp], "end", text=punkt_tekst, iid=punkt_id, tags=(punkt_id,)
                 )
 
     def treeview_item_selected(self, event):
@@ -287,12 +291,7 @@ class ProgrammiGUI:
             andmete_aken.destroy()
 
         def tühista():
-            # Eemalda punkt sõnastikust ja lõuendilt ainult siis, kui see on uus
-            if punkti_nimi not in [punkt for punkt in sonastik if punkt.startswith('punkt')]:
-                self.canvas.delete(punkti_nimi)  # Eemalda lõuendilt
-            else:
-                del sonastik[punkti_nimi]  # Eemalda sõnastikust
-
+            # Ainult sulge dialoog, ära tee muudatusi ega kustuta punkti
             self.canvas.delete("highlight")  # Eemalda highlight
             andmete_aken.destroy()
 
