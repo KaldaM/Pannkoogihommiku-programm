@@ -55,10 +55,10 @@ class ProgrammiGUI:
         # juhised kaardi kasutamiseks
         self.kaardijuhis = tk.StringVar()
         self.kaardijuhis.set(
-            "Kaardile vajutades vasakklõps lisab ruudu, paremklõps eemaldab ruudu ja rullikule vajutamine muudab värvi"
+            "Kaardil punktil vajutades on võimalik punkti muuta, sama töötab ka tabeli kaudu, paremklõps eemaldab ruudu ja rullikule vajutamine muudab värvi. \nKaardi all paremal on kaks funktsiooni, punkti lisamine ja punkti liigutamine. Need muudavad vasaku klõpsu funktsiooni."
         )
-        self.silt = tk.Label(self.root, textvariable=self.kaardijuhis, font=("Arial", 15, "bold"))
-        self.silt.pack(padx=15, pady=15, anchor="nw")
+        self.silt = tk.Label(self.root, textvariable=self.kaardijuhis, font=("Arial", 12, "bold"))
+        self.silt.pack(padx=15, pady=12, anchor="nw")
 
         # canvase tegemine
         self.canvas = tk.Canvas(self.root, width=1296, height=697)
