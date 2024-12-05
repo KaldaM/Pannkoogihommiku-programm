@@ -216,34 +216,47 @@ class ProgrammiGUI:
         if not self.liigutamine_aktiivne:
             return
 
-        # Leia lähim punkt koordinaatide järgi
+        # Leia lähim lõuendi element
         valitud_id = self.canvas.find_closest(event.x, event.y)
+        item_id = valitud_id[0]
+
+        # Leia vastav punkt sõnastikust
         for punkt_id, andmed in sonastik.items():
-            if "koordinaat" in andmed:
-                x, y = andmed["koordinaat"]
-                if abs(x - event.x) < 10 and abs(y - event.y) < 10:  # Kui klõps on punkti lähedal
-                    self.valitud_punkt = punkt_id
-                    self.highlight_punkt(x, y)
-                    break
+            if "canvas_id" in andmed and andmed["canvas_id"] == item_id:
+                self.valitud_punkt = punkt_id
+                self.valitud_canvas_id = item_id
+                break
 
 
     def lohista_punkt(self, event):
         if not self.liigutamine_aktiivne or not self.valitud_punkt:
             return
-        self.canvas.delete("highlight")
+
         x, y = event.x, event.y
         suurus = 10
-        self.canvas.create_rectangle(
-            x - suurus / 2, y - suurus / 2, x + suurus / 2, y + suurus / 2,
-            fill=sonastik[self.valitud_punkt].get("värv", "#FFFFFF"),
-            outline="purple", width=2, tags=("highlight")
+
+        # Uuenda lõuendi elemendi koordinaate
+        self.canvas.coords(
+            self.valitud_canvas_id,
+            x - suurus / 2, y - suurus / 2,
+            x + suurus / 2, y + suurus / 2
         )
+
+        # Tõsta lõuendi element teiste kohale (valikuline)
+        self.canvas.tag_raise(self.valitud_canvas_id)
+
+        # Uuenda sõnastikus punkti koordinaate
+        sonastik[self.valitud_punkt]['koordinaat'] = (x, y)
 
     def lohistamise_lopp(self, event):
         if not self.liigutamine_aktiivne or not self.valitud_punkt:
             return
-        sonastik[self.valitud_punkt]["koordinaat"] = (event.x, event.y)
+
+        # Uuenda sõnastikus punkti koordinaate
+        x, y = event.x, event.y
+        sonastik[self.valitud_punkt]['koordinaat'] = (x, y)
         self.valitud_punkt = None
+        self.valitud_canvas_id = None
         self.uuenda_punktid()  # Värskenda kõiki punkte kaardil
 
 
@@ -298,20 +311,23 @@ class ProgrammiGUI:
             taustafunktsioonid.salvesta_faili(sonastik, salvestuskoht)
 
     def uuenda_punktid(self):
-        # Eemalda ainult punktid, mitte highlight
+        # Eemalda kõik punktid lõuendilt
         self.canvas.delete('punkt')
 
-        # Joonista kõik punktid uuesti
+        # Joonista kõik punktid uuesti sõnastikust
         for punkt_id, andmed in sonastik.items():
             if "koordinaat" in andmed:
                 x, y = andmed["koordinaat"]
-                värv = andmed.get("värv", "#FF0000")
+                värv = andmed.get("värv", "#FF0000")  # Vaikimisi punane värv
                 suurus = 10
-                self.canvas.create_rectangle(
+
+                # Joonista punkt lõuendile ja salvesta lõuendi elemendi ID
+                item_id = self.canvas.create_rectangle(
                     x - suurus / 2, y - suurus / 2,
                     x + suurus / 2, y + suurus / 2,
                     fill=värv, outline="black", tags=(punkt_id, "punkt")
                 )
+                andmed['canvas_id'] = item_id  # Salvesta lõuendi elemendi ID
 
     def lisa_ruut(self, event):
         x, y = event.x, event.y
@@ -323,16 +339,17 @@ class ProgrammiGUI:
         sonastik[punkti_nimi]['koordinaat'] = (x, y)
         sonastik[punkti_nimi]['värv'] = värv
 
-        # Tee punkt kohe nähtavaks
+        # Tee punkt kohe nähtavaks ja salvesta lõuendi elemendi ID
         suurus = 10
-        self.canvas.create_rectangle(
-            x - suurus / 2, y - suurus / 2, x + suurus / 2, y + suurus / 2,
-            fill=värv, outline="purple", width=3, tags=(punkti_nimi, "punkt", "highlight")
+        item_id = self.canvas.create_rectangle(
+            x - suurus / 2, y - suurus / 2,
+            x + suurus / 2, y + suurus / 2,
+            fill=värv, outline="black", tags=(punkti_nimi, "punkt")
         )
+        sonastik[punkti_nimi]['canvas_id'] = item_id  # Salvesta lõuendi elemendi ID
 
         self.punkti_loendur += 1
         self.uuenda_sonastiku_puu()  # Värskenda TreeView
-
 
     def eemalda_ruut(self, event):
         kustutatav = self.canvas.find_closest(event.x, event.y)[0]
