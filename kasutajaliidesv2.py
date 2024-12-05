@@ -88,25 +88,50 @@ class ProgrammiGUI:
     def uuenda_sonastiku_puu(self):
         self.tree.delete(*self.tree.get_children())  # Tühjenda TreeView
 
-        grupi_node_id = {}
+        grupi_node_id = {}  # Hoiab gruppide TreeView ID-d
+        maaramata_vool = 0  # "Määramata" grupi koguvool
 
+        # Esiteks loome grupid ja summeerime vooluvajadused
         for punkt_id, andmed in sonastik.items():
-            if "koordinaat" in andmed:
-                grupp = andmed.get("grupp", "Määramata")
-                if grupp not in grupi_node_id:
-                    grupi_node_id[grupp] = self.tree.insert("", "end", text=grupp, open=True)
+            if "koordinaat" in andmed:  # Ainult punktid, mitte grupiobjektid
+                grupp = andmed.get("grupp", "Määramata")  # Kasuta vaikeväärtust "Määramata"
 
-                nimi = andmed.get("nimi", punkt_id)
-                vool = andmed.get("vooluvajadus", 0)
-                punkt_tekst = f"{nimi} - Vool: {vool}W"
+                if grupp == "Määramata":
+                    # Summeerime määramata punktide voolu
+                    maaramata_vool += andmed.get("vooluvajadus", 0)
+                else:
+                    # Kui gruppi pole veel lisatud, loome selle
+                    if grupp not in grupi_node_id:
+                        grupi_vool = sum(
+                            punkt.get("vooluvajadus", 0)
+                            for punkt in sonastik.values()
+                            if punkt.get("grupp") == grupp
+                        )
+                        grupi_tekst = f"{grupp} - Vool: {grupi_vool}W"
+                        grupi_node_id[grupp] = self.tree.insert("", "end", text=grupi_tekst, open=True)
 
-                # Määra punkti värv
-                värv = andmed.get("värv", "#FFFFFF")
-                self.tree.tag_configure(punkt_id, background=värv)  # Lisa taustavärv
+                    # Lisa punkt gruppi
+                    nimi = andmed.get("nimi", punkt_id)
+                    vool = andmed.get("vooluvajadus", 0)
+                    punkt_tekst = f"{nimi} - Vool: {vool}W"
+                    värv = andmed.get("värv", "#FFFFFF")
+                    self.tree.tag_configure(punkt_id, background=värv)
+                    self.tree.insert(grupi_node_id[grupp], "end", text=punkt_tekst, iid=punkt_id, tags=(punkt_id,))
 
-                punkt_node = self.tree.insert(
-                    grupi_node_id[grupp], "end", text=punkt_tekst, iid=punkt_id, tags=(punkt_id,)
-                )
+        # Nüüd lisame määramata grupi
+        if maaramata_vool > 0:  # Lisa ainult, kui voolu summa pole null
+            maaramata_node = self.tree.insert("", "end", text=f"Määramata - Vool: {maaramata_vool}W", open=True)
+
+            # Lisa määramata punktid selle grupi alla
+            for punkt_id, andmed in sonastik.items():
+                if "koordinaat" in andmed and andmed.get("grupp", "Määramata") == "Määramata":
+                    nimi = andmed.get("nimi", punkt_id)
+                    vool = andmed.get("vooluvajadus", 0)
+                    punkt_tekst = f"{nimi} - Vool: {vool}W"
+                    värv = andmed.get("värv", "#FFFFFF")
+                    self.tree.tag_configure(punkt_id, background=värv)
+                    self.tree.insert(maaramata_node, "end", text=punkt_tekst, iid=punkt_id, tags=(punkt_id,))
+
 
     def treeview_item_selected(self, event):
         self.canvas.delete("highlight")  # Eemalda ainult highlight kastid
