@@ -75,9 +75,22 @@ class ProgrammiGUI:
         self.tree.heading("#0", text="Sõnastik", anchor="w")
         self.uuenda_sonastiku_puu()
 
+        # Aktiivne punktide liigutamine/lisamine
+        self.liigutamine_aktiivne = False
+        self.lisamine_aktiivne = False
+        self.valitud_punkt = None
 
-        # Seome sündmused, kasutades lambda't, et edasi anda `self`
-        self.canvas.bind("<Button-1>", self.lisa_ruut)
+        # Nupud punktide lisamise ja liigutamise aktiveerimiseks
+        self.lisa_nupp = tk.Button(self.root, text="Lisa punkte", command=self.aktiveeri_lisamine)
+        self.lisa_nupp.place(relx=0.65, rely=0.78, anchor="se")
+
+        self.liiguta_nupp = tk.Button(self.root, text="Liiguta punkte", command=self.aktiveeri_liigutamine)
+        self.liiguta_nupp.place(relx=0.72, rely=0.78, anchor="se")
+
+        # Canvase sündmuste sidumine
+        self.canvas.bind("<Button-1>", self.canvas_klikk)
+        self.canvas.bind("<B1-Motion>", self.lohista_punkt)
+        self.canvas.bind("<ButtonRelease-1>", self.lohistamise_lopp)
         self.canvas.bind("<Button-3>", self.eemalda_ruut)
         self.canvas.bind("<Button-2>", self.muuda_ruudu_varvi)
 
@@ -149,10 +162,101 @@ class ProgrammiGUI:
                 self.canvas.create_rectangle(
                     koordinaadid[0] - suurus / 2, koordinaadid[1] - suurus / 2,
                     koordinaadid[0] + suurus / 2, koordinaadid[1] + suurus / 2,
-                    outline="yellow", width=3, tags="highlight"
+                    outline="purple", width=3, tags="highlight"
                 )
                 # Ava andmete muutmise dialoog
                 self.andme_dialog(punkt_id, koordinaadid, punkt_data.get("värv", "#FFFFFF"))
+
+
+    def aktiveeri_lisamine(self):
+        self.lisamine_aktiivne = not self.lisamine_aktiivne
+        self.liigutamine_aktiivne = False  # Deaktiveerime liigutamise
+        self.liiguta_nupp.config(text="Liiguta punkte")
+        if self.lisamine_aktiivne:
+            self.lisa_nupp.config(text="Lisamine: Aktiivne")
+        else:
+            self.lisa_nupp.config(text="Lisa punkte")
+
+    def aktiveeri_liigutamine(self):
+        self.liigutamine_aktiivne = not self.liigutamine_aktiivne
+        self.lisamine_aktiivne = False  # Deaktiveerime lisamise
+        self.lisa_nupp.config(text="Lisa punkte")
+        if self.liigutamine_aktiivne:
+            self.liiguta_nupp.config(text="Liigutamine: Aktiivne")
+        else:
+            self.liiguta_nupp.config(text="Liiguta punkte")
+        self.valitud_punkt = None  # Eemaldame aktiivse valiku
+
+
+        def vali_punkt(self, event):
+            if not self.liigutamine_aktiivne:
+                return
+
+            # Leia lähim punkt koordinaatide järgi
+            valitud_id = self.canvas.find_closest(event.x, event.y)
+            for punkt_id, andmed in sonastik.items():
+                if "koordinaat" in andmed:
+                    x, y = andmed["koordinaat"]
+                    if abs(x - event.x) < 10 and abs(y - event.y) < 10:  # Kui klõps on punkti lähedal
+                        self.valitud_punkt = punkt_id
+                        self.highlight_punkt(x, y)
+                        break
+
+
+    def canvas_klikk(self, event):
+        if self.lisamine_aktiivne:
+            self.lisa_ruut(event)  # Kui lisamine on aktiivne, lisa punkt
+        elif self.liigutamine_aktiivne:
+            self.vali_punkt(event)  # Kui liigutamine on aktiivne, vali punkt
+        else:
+            self.highlight_ja_muuda(event)  # Kui kumbki pole aktiivne, highlight ja ava andmete muutmine
+
+
+    def vali_punkt(self, event):
+        if not self.liigutamine_aktiivne:
+            return
+
+        # Leia lähim punkt koordinaatide järgi
+        valitud_id = self.canvas.find_closest(event.x, event.y)
+        for punkt_id, andmed in sonastik.items():
+            if "koordinaat" in andmed:
+                x, y = andmed["koordinaat"]
+                if abs(x - event.x) < 10 and abs(y - event.y) < 10:  # Kui klõps on punkti lähedal
+                    self.valitud_punkt = punkt_id
+                    self.highlight_punkt(x, y)
+                    break
+
+
+    def lohista_punkt(self, event):
+        if not self.liigutamine_aktiivne or not self.valitud_punkt:
+            return
+        self.canvas.delete("highlight")
+        x, y = event.x, event.y
+        suurus = 10
+        self.canvas.create_rectangle(
+            x - suurus / 2, y - suurus / 2, x + suurus / 2, y + suurus / 2,
+            fill=sonastik[self.valitud_punkt].get("värv", "#FFFFFF"),
+            outline="purple", width=2, tags=("highlight")
+        )
+
+    def lohistamise_lopp(self, event):
+        if not self.liigutamine_aktiivne or not self.valitud_punkt:
+            return
+        sonastik[self.valitud_punkt]["koordinaat"] = (event.x, event.y)
+        self.valitud_punkt = None
+        self.uuenda_punktid()  # Värskenda kõiki punkte kaardil
+
+
+    def highlight_ja_muuda(self, event):
+        # Leia lähim punkt
+        valitud_id = self.canvas.find_closest(event.x, event.y)
+        for punkt_id, andmed in sonastik.items():
+            if "koordinaat" in andmed:
+                x, y = andmed["koordinaat"]
+                if abs(x - event.x) < 10 and abs(y - event.y) < 10:  # Kui klõps on punkti lähedal
+                    self.highlight_punkt(x, y)  # Highlight punkt
+                    self.andme_dialog(punkt_id, (x, y), andmed.get("värv", "#FFFFFF"))  # Ava andmete dialoog
+                    break
 
 
     def impordi_sonastik(self):
@@ -178,6 +282,13 @@ class ProgrammiGUI:
 
         self.uuenda_sonastiku_puu()
 
+    def highlight_punkt(self, x, y):
+        suurus = 15
+        self.canvas.delete("highlight")
+        self.canvas.create_rectangle(
+            x - suurus / 2, y - suurus / 2, x + suurus / 2, y + suurus / 2,
+            outline="purple", width=3, tags="highlight"
+        )
 
     def expordi_sonastik(self):
         salvestuskoht = filedialog.askopenfilename(title='Vali fail', filetypes=[('txt failid', '*.txt'), ('All Files', '.*')])
@@ -203,7 +314,7 @@ class ProgrammiGUI:
                 )
 
     def lisa_ruut(self, event):
-        x, y = event.x, event.y  # Koordinaadid, kuhu hiirega vajutati
+        x, y = event.x, event.y
         värv = "#FF0000"  # Vaikimisi punane värv
         punkti_nimi = f'punkt-{self.punkti_loendur}'
 
@@ -216,13 +327,12 @@ class ProgrammiGUI:
         suurus = 10
         self.canvas.create_rectangle(
             x - suurus / 2, y - suurus / 2, x + suurus / 2, y + suurus / 2,
-            fill=värv, outline="yellow", width=3, tags=(punkti_nimi, "punkt", "highlight")
+            fill=värv, outline="purple", width=3, tags=(punkti_nimi, "punkt", "highlight")
         )
 
-        # Ava andmete muutmise dialoog
-        self.andme_dialog(punkti_nimi, (x, y), värv)
-
         self.punkti_loendur += 1
+        self.uuenda_sonastiku_puu()  # Värskenda TreeView
+
 
     def eemalda_ruut(self, event):
         kustutatav = self.canvas.find_closest(event.x, event.y)[0]
