@@ -22,6 +22,7 @@ from tkinter import ttk
 from PIL import ImageTk, Image
 import taustafunktsioonid
 import json
+import math
 
 
 sonastik = {
@@ -35,6 +36,8 @@ sonastik = {
 class ProgrammiGUI:
     def __init__(self):
         self.punkti_loendur = 1
+        self.mõõdulindi_punktid = []
+        self.mõõdulindi_punktiloendur = 0
         self.root = tk.Tk()
         self.root.geometry("1800x1000")
         self.root.title("Koordinaatide valimine")
@@ -76,16 +79,21 @@ class ProgrammiGUI:
         self.uuenda_sonastiku_puu()
 
         # Aktiivne punktide liigutamine/lisamine
+        self.mõõdulint_aktiivne = False
         self.liigutamine_aktiivne = False
         self.lisamine_aktiivne = False
         self.valitud_punkt = None
 
-        # Nupud punktide lisamise ja liigutamise aktiveerimiseks
+        # Nupud punktide lisamise ja liigutamise aktiveerimiseks ning mõõdulindi funktsiooni käivitamiseks
+        self.mõõdulint_nupp = tk.Button(self.root, text="Mõõdulint", command=self.aktiveeri_mõõdulint)
+        self.mõõdulint_nupp.place(relx=0.59, rely=0.78, anchor="se")
+
         self.lisa_nupp = tk.Button(self.root, text="Lisa punkte", command=self.aktiveeri_lisamine)
         self.lisa_nupp.place(relx=0.65, rely=0.78, anchor="se")
 
         self.liiguta_nupp = tk.Button(self.root, text="Liiguta punkte", command=self.aktiveeri_liigutamine)
         self.liiguta_nupp.place(relx=0.72, rely=0.78, anchor="se")
+
 
         # Canvase sündmuste sidumine
         self.canvas.bind("<Button-1>", self.canvas_klikk)
@@ -168,9 +176,25 @@ class ProgrammiGUI:
                 self.andme_dialog(punkt_id, koordinaadid, punkt_data.get("värv", "#FFFFFF"))
 
 
+    def aktiveeri_mõõdulint(self):
+        self.mõõdulint_aktiivne = not self.mõõdulint_aktiivne
+        self.liigutamine_aktiivne = False  # Deaktiveerime liigutamise
+        self.lisamine_aktiivne = False  # Deaktiveerime lisamise
+        self.lisa_nupp.config(text="Lisa punkte")
+        self.liiguta_nupp.config(text="Liiguta punkte")
+        if self.mõõdulint_aktiivne:
+            self.mõõdulint_nupp.config(text="Mõõdulint: Aktiivne")
+        else:
+            self.mõõdulint_nupp.config(text="Mõõdulint")
+        self.valitud_punkt = None  # Eemaldame aktiivse valiku
+
+
+
     def aktiveeri_lisamine(self):
         self.lisamine_aktiivne = not self.lisamine_aktiivne
+        self.mõõdulint_aktiivne = False  # Deaktiveerime mõõdulindi
         self.liigutamine_aktiivne = False  # Deaktiveerime liigutamise
+        self.mõõdulint_nupp.config(text="Mõõdulint")
         self.liiguta_nupp.config(text="Liiguta punkte")
         if self.lisamine_aktiivne:
             self.lisa_nupp.config(text="Lisamine: Aktiivne")
@@ -179,7 +203,9 @@ class ProgrammiGUI:
 
     def aktiveeri_liigutamine(self):
         self.liigutamine_aktiivne = not self.liigutamine_aktiivne
+        self.mõõdulint_aktiivne = False  # Deaktiveerime mõõdulindi
         self.lisamine_aktiivne = False  # Deaktiveerime lisamise
+        self.mõõdulint_nupp.config(text="Mõõdulint")
         self.lisa_nupp.config(text="Lisa punkte")
         if self.liigutamine_aktiivne:
             self.liiguta_nupp.config(text="Liigutamine: Aktiivne")
@@ -203,13 +229,16 @@ class ProgrammiGUI:
                         break
 
 
+
     def canvas_klikk(self, event):
         if self.lisamine_aktiivne:
             self.lisa_ruut(event)  # Kui lisamine on aktiivne, lisa punkt
         elif self.liigutamine_aktiivne:
             self.vali_punkt(event)  # Kui liigutamine on aktiivne, vali punkt
+        elif self.mõõdulint_aktiivne:
+            self.mõõdulint(event)  # Kui mõõdulint on aktiivne, vali mõõdulindi funktsioon
         else:
-            self.highlight_ja_muuda(event)  # Kui kumbki pole aktiivne, highlight ja ava andmete muutmine
+            self.highlight_ja_muuda(event)  # Kui ükski pole aktiivne, highlight ja ava andmete muutmine
 
 
     def vali_punkt(self, event):
@@ -249,7 +278,7 @@ class ProgrammiGUI:
         sonastik[self.valitud_punkt]['koordinaat'] = (x, y)
 
     def lohistamise_lopp(self, event):
-        if not self.liigutamine_aktiivne or not self.valitud_punkt:
+        if not self.liigutamine_aktiivne or not self.valitud_punkt or not self.mõõdulint_aktiivne:
             return
 
         # Uuenda sõnastikus punkti koordinaate
@@ -258,6 +287,38 @@ class ProgrammiGUI:
         self.valitud_punkt = None
         self.valitud_canvas_id = None
         self.uuenda_punktid()  # Värskenda kõiki punkte kaardil
+
+    def mõõdulint(self, event):
+        x, y = event.x, event.y
+        värv = "#000000"  # Vaikimisi must värv
+
+        # Loome mõõdulindi otspunkti
+        mõõdulindi_punkt = self.canvas.create_oval(
+            x - 3, y - 3,
+            x + 3, y + 3,
+            fill=värv
+        )
+
+        self.mõõdulindi_punktid.append([x, y])
+
+        # Loome joone(d) otspunktide vahele
+        if len(self.mõõdulindi_punktid) >= 2:
+            self.canvas.create_line(self.mõõdulindi_punktid[self.mõõdulindi_punktiloendur][0], self.mõõdulindi_punktid[self.mõõdulindi_punktiloendur][1],
+                               self.mõõdulindi_punktid[self.mõõdulindi_punktiloendur + 1][0], self.mõõdulindi_punktid[self.mõõdulindi_punktiloendur + 1][1],
+                               fill=värv, width=2
+            )
+
+            # Loome vahemaa punktide vahele, teisendame meetriteks
+            vahemaa = round(math.dist(self.mõõdulindi_punktid[self.mõõdulindi_punktiloendur],
+                               self.mõõdulindi_punktid[self.mõõdulindi_punktiloendur + 1]) / 6.536, 2
+            )
+
+            # Kuvame canvasele kahe punkti vahelise distantsi
+            self.canvas.create_text((self.mõõdulindi_punktid[self.mõõdulindi_punktiloendur][0] + self.mõõdulindi_punktid[self.mõõdulindi_punktiloendur + 1][0]) / 2,
+                               ((self.mõõdulindi_punktid[self.mõõdulindi_punktiloendur][1] + self.mõõdulindi_punktid[self.mõõdulindi_punktiloendur + 1][1]) / 2) + 15,
+                               text=(vahemaa, "m"), fill="black", font=("bold", 10))
+
+            self.mõõdulindi_punktiloendur += 1
 
 
     def highlight_ja_muuda(self, event):
