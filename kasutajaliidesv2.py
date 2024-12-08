@@ -37,6 +37,8 @@ class ProgrammiGUI:
     def __init__(self):
         self.punkti_loendur = 1
         self.mõõdulindi_punktid = []
+        self.mõõdulindi_jooned = []
+        self.mõõdulindi_distantsid = []
         self.mõõdulindi_punktiloendur = 0
         self.root = tk.Tk()
         self.root.geometry("1800x1000")
@@ -58,10 +60,20 @@ class ProgrammiGUI:
         # juhised kaardi kasutamiseks
         self.kaardijuhis = tk.StringVar()
         self.kaardijuhis.set(
-            "Kaardil punktil vajutades on võimalik punkti muuta, sama töötab ka tabeli kaudu, paremklõps eemaldab ruudu ja rullikule vajutamine muudab värvi. \nKaardi all paremal on kaks funktsiooni, punkti lisamine ja punkti liigutamine. Need muudavad vasaku klõpsu funktsiooni."
+            "Kaardil punktil vajutades on võimalik punkti muuta, sama töötab ka tabeli kaudu. Kaardi all paremal on kolm nuppu. Need muudavad hiire funktsioone."
         )
         self.silt = tk.Label(self.root, textvariable=self.kaardijuhis, font=("Arial", 12, "bold"))
         self.silt.pack(padx=15, pady=12, anchor="nw")
+
+        self.kaardijuhis2 = tk.StringVar()
+        self.kaardijuhis2.set(
+            """Mõõdulint: vasaku klõpsuga saab lisada mõõdulindi punkte, aga paremaga kustutad saadud tulemused (ükskõik, kus vajutades).\n
+            Lisa punkte: vasaku klõpsuga lisad punkte (telgid), aga paremaga kustutad vastavad punktid (otse peale vajutades).\n
+            Liiguta punkte: vasaku klõpsuga hoiad soovitud punkti peal ja lohistad.
+            """
+        )
+        self.silt = tk.Label(self.root, textvariable=self.kaardijuhis2, font=("Arial", 12, "bold"), justify="left")
+        self.silt.pack(anchor="sw", side="bottom", pady=60, padx=10)
 
         # canvase tegemine
         self.canvas = tk.Canvas(self.root, width=1296, height=697)
@@ -80,8 +92,10 @@ class ProgrammiGUI:
 
         # Aktiivne punktide liigutamine/lisamine
         self.mõõdulint_aktiivne = False
+        self.mõõdulindi_reset_aktiivne = False
         self.liigutamine_aktiivne = False
         self.lisamine_aktiivne = False
+        self.eemaldamine_aktiivne = False
         self.valitud_punkt = None
 
         # Nupud punktide lisamise ja liigutamise aktiveerimiseks ning mõõdulindi funktsiooni käivitamiseks
@@ -96,10 +110,10 @@ class ProgrammiGUI:
 
 
         # Canvase sündmuste sidumine
-        self.canvas.bind("<Button-1>", self.canvas_klikk)
+        self.canvas.bind("<Button-1>", self.canvas_vasakklikk)
         self.canvas.bind("<B1-Motion>", self.lohista_punkt)
         self.canvas.bind("<ButtonRelease-1>", self.lohistamise_lopp)
-        self.canvas.bind("<Button-3>", self.eemalda_ruut)
+        self.canvas.bind("<Button-3>", self.canvas_paremklikk)
         self.canvas.bind("<Button-2>", self.muuda_ruudu_varvi)
 
         self.tree.bind("<<TreeviewSelect>>", self.treeview_item_selected)
@@ -176,10 +190,13 @@ class ProgrammiGUI:
                 self.andme_dialog(punkt_id, koordinaadid, punkt_data.get("värv", "#FFFFFF"))
 
 
+    #Vasaku hiireklõpsu funktsioonid:
     def aktiveeri_mõõdulint(self):
         self.mõõdulint_aktiivne = not self.mõõdulint_aktiivne
+        self.mõõdulindi_reset_aktiivne = not self.mõõdulindi_reset_aktiivne
         self.liigutamine_aktiivne = False  # Deaktiveerime liigutamise
         self.lisamine_aktiivne = False  # Deaktiveerime lisamise
+        self.eemaldamine_aktiivne = False  # Deaktiveerime eemaldamise
         self.lisa_nupp.config(text="Lisa punkte")
         self.liiguta_nupp.config(text="Liiguta punkte")
         if self.mõõdulint_aktiivne:
@@ -188,11 +205,11 @@ class ProgrammiGUI:
             self.mõõdulint_nupp.config(text="Mõõdulint")
         self.valitud_punkt = None  # Eemaldame aktiivse valiku
 
-
-
     def aktiveeri_lisamine(self):
         self.lisamine_aktiivne = not self.lisamine_aktiivne
+        self.eemaldamine_aktiivne = not self.eemaldamine_aktiivne
         self.mõõdulint_aktiivne = False  # Deaktiveerime mõõdulindi
+        self.mõõdulindi_reset_aktiivne = False  # Deaktiveerime mõõdulindi reseti
         self.liigutamine_aktiivne = False  # Deaktiveerime liigutamise
         self.mõõdulint_nupp.config(text="Mõõdulint")
         self.liiguta_nupp.config(text="Liiguta punkte")
@@ -204,7 +221,9 @@ class ProgrammiGUI:
     def aktiveeri_liigutamine(self):
         self.liigutamine_aktiivne = not self.liigutamine_aktiivne
         self.mõõdulint_aktiivne = False  # Deaktiveerime mõõdulindi
+        self.mõõdulindi_reset_aktiivne = False  # Deaktiveerime mõõdulindi reseti
         self.lisamine_aktiivne = False  # Deaktiveerime lisamise
+        self.eemaldamine_aktiivne = False  # Deaktiveerime eemaldamise
         self.mõõdulint_nupp.config(text="Mõõdulint")
         self.lisa_nupp.config(text="Lisa punkte")
         if self.liigutamine_aktiivne:
@@ -229,8 +248,10 @@ class ProgrammiGUI:
                         break
 
 
+    # Parema hiireklõpsu funktsioonid eraldi (kui neid tuleb, praegu on kõik paralleelselt vasaku hiireklõpsu funktsioonidega):
+    # ...
 
-    def canvas_klikk(self, event):
+    def canvas_vasakklikk(self, event):
         if self.lisamine_aktiivne:
             self.lisa_ruut(event)  # Kui lisamine on aktiivne, lisa punkt
         elif self.liigutamine_aktiivne:
@@ -239,6 +260,12 @@ class ProgrammiGUI:
             self.mõõdulint(event)  # Kui mõõdulint on aktiivne, vali mõõdulindi funktsioon
         else:
             self.highlight_ja_muuda(event)  # Kui ükski pole aktiivne, highlight ja ava andmete muutmine
+
+    def canvas_paremklikk(self, event):
+        if self.mõõdulindi_reset_aktiivne:
+            self.mõõdulindi_reset()
+        elif self.eemaldamine_aktiivne:
+            self.eemalda_ruut(event)
 
 
     def vali_punkt(self, event):
@@ -255,7 +282,6 @@ class ProgrammiGUI:
                 self.valitud_punkt = punkt_id
                 self.valitud_canvas_id = item_id
                 break
-
 
     def lohista_punkt(self, event):
         if not self.liigutamine_aktiivne or not self.valitud_punkt:
@@ -299,27 +325,49 @@ class ProgrammiGUI:
             fill=värv
         )
 
-        self.mõõdulindi_punktid.append([x, y])
+        # Muutujat mõõdulindi_punkt kasutatakse mõõdulindi resettimisel ja muutujaid x ja y järgnevate joonte ja omavahelise distantsi arvutamiseks
+        self.mõõdulindi_punktid.append([mõõdulindi_punkt, [x, y]])
 
         # Loome joone(d) otspunktide vahele
         if len(self.mõõdulindi_punktid) >= 2:
-            self.canvas.create_line(self.mõõdulindi_punktid[self.mõõdulindi_punktiloendur][0], self.mõõdulindi_punktid[self.mõõdulindi_punktiloendur][1],
-                               self.mõõdulindi_punktid[self.mõõdulindi_punktiloendur + 1][0], self.mõõdulindi_punktid[self.mõõdulindi_punktiloendur + 1][1],
-                               fill=värv, width=2
+            mõõdulindi_joon = (
+                                self.canvas.create_line(self.mõõdulindi_punktid[self.mõõdulindi_punktiloendur][1][0], self.mõõdulindi_punktid[self.mõõdulindi_punktiloendur][1][1],
+                               self.mõõdulindi_punktid[self.mõõdulindi_punktiloendur + 1][1][0], self.mõõdulindi_punktid[self.mõõdulindi_punktiloendur + 1][1][1],
+                               fill=värv, width=2)
             )
 
+            self.mõõdulindi_jooned.append(mõõdulindi_joon) #Lisame jooned listi, et neid saaks hiljem resettida
+
             # Loome vahemaa punktide vahele, teisendame meetriteks
-            vahemaa = round(math.dist(self.mõõdulindi_punktid[self.mõõdulindi_punktiloendur],
-                               self.mõõdulindi_punktid[self.mõõdulindi_punktiloendur + 1]) / 6.536, 2
+            vahemaa = round(math.dist(self.mõõdulindi_punktid[self.mõõdulindi_punktiloendur][1],
+                               self.mõõdulindi_punktid[self.mõõdulindi_punktiloendur + 1][1]) / 6.536, 2
             )
 
             # Kuvame canvasele kahe punkti vahelise distantsi
-            self.canvas.create_text((self.mõõdulindi_punktid[self.mõõdulindi_punktiloendur][0] + self.mõõdulindi_punktid[self.mõõdulindi_punktiloendur + 1][0]) / 2,
-                               ((self.mõõdulindi_punktid[self.mõõdulindi_punktiloendur][1] + self.mõõdulindi_punktid[self.mõõdulindi_punktiloendur + 1][1]) / 2) + 15,
+            vahemaa_tekst = self.canvas.create_text((self.mõõdulindi_punktid[self.mõõdulindi_punktiloendur][1][0] + self.mõõdulindi_punktid[self.mõõdulindi_punktiloendur + 1][1][0]) / 2,
+                               ((self.mõõdulindi_punktid[self.mõõdulindi_punktiloendur][1][1] + self.mõõdulindi_punktid[self.mõõdulindi_punktiloendur + 1][1][1]) / 2) + 15,
                                text=(vahemaa, "m"), fill="black", font=("bold", 10))
+
+            self.mõõdulindi_distantsid.append(vahemaa_tekst)  # Lisame vahemaad listi, et neid saaks hiljem resettida
 
             self.mõõdulindi_punktiloendur += 1
 
+    def mõõdulindi_reset(self):
+        # Kustutame canvaselt kõik mõõdulindiga seotud elemendid
+        for element in self.mõõdulindi_punktid:
+            self.canvas.delete(element[0])
+        for element in self.mõõdulindi_jooned:
+            self.canvas.delete(element)
+        for element in self.mõõdulindi_distantsid:
+            self.canvas.delete(element)
+
+        # Tühjendame mõõdulindiga seotud listid, et neid saaks uue mõõdulindi loomisel kasutada
+        self.mõõdulindi_punktid.clear()
+        self.mõõdulindi_jooned.clear()
+        self.mõõdulindi_distantsid.clear()
+
+        # Nullime punktiloenduri
+        self.mõõdulindi_punktiloendur = 0
 
     def highlight_ja_muuda(self, event):
         # Leia lähim punkt
@@ -413,6 +461,9 @@ class ProgrammiGUI:
         self.uuenda_sonastiku_puu()  # Värskenda TreeView
 
     def eemalda_ruut(self, event):
+        if not self.eemaldamine_aktiivne:
+            return
+
         kustutatav = self.canvas.find_closest(event.x, event.y)[0]
         vajutatud_punkt = self.canvas.coords(kustutatav)
         punktikese_x = (vajutatud_punkt[0] + vajutatud_punkt[2]) / 2
