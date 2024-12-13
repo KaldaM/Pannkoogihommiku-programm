@@ -8,6 +8,7 @@ def lisa_sonastikku(sonastik, punkti_nimi):
         'värv': '',
         'grupp': '',
         'vooluvajadus': 0,
+        'seadmed': {},
         'kommentaar': '',
         'vajalikud esemed': {}
     }
@@ -38,6 +39,10 @@ def muuda_gruppi(sonastik, punkti_nimi, grupp):
 def muuda_vooluvajadust(sonastik, punkti_nimi, vooluvajadus):
     sonastik[punkti_nimi]['vooluvajadus'] = vooluvajadus
     uuenda_grupi_vooluvajadust(sonastik)
+
+
+def muuda_seadmeid(sonastik, punkti_nimi, seadmed):
+    sonastik[punkti_nimi]['seadmed'] = seadmed
 
 
 def muuda_kommentaari(sonastik, punkti_nimi, kommentaar):

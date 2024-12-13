@@ -25,12 +25,7 @@ import json
 import math
 
 
-sonastik = {
-    'kapid': {
-            'kapp1': [11.23, 25.12],
-            'kapp2': [22.0, 23.0]
-        }
-}
+sonastik = {}
 
 
 class ProgrammiGUI:
@@ -96,7 +91,7 @@ class ProgrammiGUI:
         self.mõõdulindi_reset_aktiivne = False
         self.liigutamine_aktiivne = False
         self.lisamine_aktiivne = False
-        self.eemaldamine_aktiivne = False
+        self.eemaldamine_aktiivne = True
         self.valitud_punkt = None
 
         # Nupud punktide lisamise ja liigutamise aktiveerimiseks ning mõõdulindi funktsiooni käivitamiseks
@@ -119,7 +114,48 @@ class ProgrammiGUI:
 
         self.tree.bind("<<TreeviewSelect>>", self.treeview_item_selected)
 
+        self.lisa_kapid()
+        self.valitud_canvas_id = None
+
         self.root.mainloop()
+
+    def lisa_kapid(self):
+        """Lisab kaardile 7 elektrikappi, millest 2 on punased (32A) ja ülejäänud sinised."""
+        kapid = [
+            {"nimi": "PVK 1", "koordinaat": (462, 588), "vool": 11000, "värv": "#0000FF"},
+            {"nimi": "PVK 2", "koordinaat": (685, 482), "vool": 22000, "värv": "#FF0000"},
+            {"nimi": "PVK 3", "koordinaat": (920, 383), "vool": 11000, "värv": "#0000FF"},
+            {"nimi": "PVK 10", "koordinaat": (255, 542), "vool": 11000, "värv": "#0000FF"},
+            {"nimi": "PVK 9", "koordinaat": (350,311), "vool": 11000, "värv": "#0000FF"},
+            {"nimi": "PVK 7", "koordinaat": (579, 258), "vool": 22000, "värv": "#FF0000"},
+            {"nimi": "PVK 6", "koordinaat": (773, 207), "vool": 11000, "värv": "#0000FF"},
+        ]
+
+        for idx, kapp in enumerate(kapid, start=1):
+            punkti_nimi = f'kapp{idx}'
+            sonastik[punkti_nimi] = {
+                "nimi": kapp["nimi"],
+                "koordinaat": kapp["koordinaat"],
+                "vooluvajadus": kapp["vool"],
+                "värv": kapp["värv"],
+                "grupp": "Kapid",
+            }
+
+            # Joonista ring kaardile
+            ringi_suurus = 14
+
+            item_id = self.canvas.create_oval(
+                kapp["koordinaat"][0] - ringi_suurus / 2,
+                kapp["koordinaat"][1] - ringi_suurus / 2,
+                kapp["koordinaat"][0] + ringi_suurus / 2,
+                kapp["koordinaat"][1] + ringi_suurus / 2,
+                fill=kapp["värv"], outline="black", tags= "kapp"
+            )
+            sonastik[punkti_nimi]["canvas_id"] = item_id
+
+        self.uuenda_sonastiku_puu()
+
+
 
     def uuenda_sonastiku_puu(self):
         self.tree.delete(*self.tree.get_children())  # Tühjenda TreeView
@@ -196,7 +232,7 @@ class ProgrammiGUI:
         self.mõõdulindi_reset_aktiivne = not self.mõõdulindi_reset_aktiivne
         self.liigutamine_aktiivne = False  # Deaktiveerime liigutamise
         self.lisamine_aktiivne = False  # Deaktiveerime lisamise
-        self.eemaldamine_aktiivne = False  # Deaktiveerime eemaldamise
+        self.eemaldamine_aktiivne = not self.eemaldamine_aktiivne  # Deaktiveerime eemaldamise
         self.lisa_nupp.config(text="Lisa punkte")
         self.liiguta_nupp.config(text="Liiguta punkte")
         if self.mõõdulint_aktiivne:
@@ -207,7 +243,7 @@ class ProgrammiGUI:
 
     def aktiveeri_lisamine(self):
         self.lisamine_aktiivne = not self.lisamine_aktiivne
-        self.eemaldamine_aktiivne = not self.eemaldamine_aktiivne
+        self.eemaldamine_aktiivne = True
         self.mõõdulint_aktiivne = False  # Deaktiveerime mõõdulindi
         self.mõõdulindi_reset_aktiivne = False  # Deaktiveerime mõõdulindi reseti
         self.liigutamine_aktiivne = False  # Deaktiveerime liigutamise
@@ -223,7 +259,7 @@ class ProgrammiGUI:
         self.mõõdulint_aktiivne = False  # Deaktiveerime mõõdulindi
         self.mõõdulindi_reset_aktiivne = False  # Deaktiveerime mõõdulindi reseti
         self.lisamine_aktiivne = False  # Deaktiveerime lisamise
-        self.eemaldamine_aktiivne = False  # Deaktiveerime eemaldamise
+        self.eemaldamine_aktiivne = True  # Deaktiveerime eemaldamise
         self.mõõdulint_nupp.config(text="Mõõdulint")
         self.lisa_nupp.config(text="Lisa punkte")
         if self.liigutamine_aktiivne:
@@ -285,6 +321,9 @@ class ProgrammiGUI:
 
     def lohista_punkt(self, event):
         if not self.liigutamine_aktiivne or not self.valitud_punkt:
+            return
+
+        if 'kapp' in self.canvas.gettags(self.valitud_canvas_id):
             return
 
         x, y = event.x, event.y
@@ -423,7 +462,7 @@ class ProgrammiGUI:
 
         # Joonista kõik punktid uuesti sõnastikust
         for punkt_id, andmed in sonastik.items():
-            if "koordinaat" in andmed:
+            if "koordinaat" in andmed and not punkt_id.startswith('kapp'):
                 x, y = andmed["koordinaat"]
                 värv = andmed.get("värv", "#FF0000")  # Vaikimisi punane värv
 
@@ -459,6 +498,7 @@ class ProgrammiGUI:
     def eemalda_ruut(self, event):
         if not self.eemaldamine_aktiivne:
             return
+
 
         kustutatav = self.canvas.find_closest(event.x, event.y)[0]
         vajutatud_punkt = self.canvas.coords(kustutatav)
@@ -517,6 +557,8 @@ class ProgrammiGUI:
         andmete_aken = tk.Toplevel(self.root)
         andmete_aken.title('Andmete muutmine')
 
+        andmete_aken.attributes('-topmost', True)
+
         tk.Label(andmete_aken, text="Nimi:").grid(row=0, column=0, padx=5, pady=5)
         nimi_var = tk.Entry(andmete_aken)
         nimi_var.insert(0, sonastik[punkti_nimi].get("nimi", ""))
@@ -527,36 +569,89 @@ class ProgrammiGUI:
         grupp_var.insert(0, sonastik[punkti_nimi].get("grupp", ""))
         grupp_var.grid(row=1, column=1, padx=5, pady=5)
 
-        tk.Label(andmete_aken, text="Vooluvajadus (W):").grid(row=2, column=0, padx=5, pady=5)
-        vooluvajadus_var = tk.Entry(andmete_aken)
-        vooluvajadus_var.insert(0, sonastik[punkti_nimi].get("vooluvajadus", 0))
-        vooluvajadus_var.grid(row=2, column=1, padx=5, pady=5)
+        # Seadmed ja vooluvajadus
+        tk.Label(andmete_aken, text="Seadmed ja nende vool (W):").grid(row=2, column=0, padx=5, pady=5)
+        seadmed = sonastik[punkti_nimi].get("seadmed", {})
 
-        tk.Label(andmete_aken, text="Kommentaar:").grid(row=3, column=0, padx=5, pady=5)
-        kommentaar_var = tk.Entry(andmete_aken)
-        kommentaar_var.insert(0, sonastik[punkti_nimi].get("kommentaar", ""))
-        kommentaar_var.grid(row=3, column=1, padx=5, pady=5)
+        # Seadmete haldamise raamistik
+        seadmete_raam = tk.Frame(andmete_aken)
+        seadmete_raam.grid(row=3, column=0, columnspan=2, padx=5, pady=5)
+
+        def uuenda_seadmete_loend():
+            """Uuendab seadmete nimekirja kuvamist."""
+            for seade in seadmete_raam.winfo_children():
+                seade.destroy()
+
+            for idx, (seade, vool) in enumerate(seadmed.items()):
+                tk.Label(seadmete_raam, text=f"{seade}:").grid(row=idx, column=0, sticky="w", padx=5, pady=2)
+                vool_var = tk.Entry(seadmete_raam, width=10)
+                vool_var.insert(0, str(vool))
+                vool_var.grid(row=idx, column=1, padx=5, pady=2)
+
+                def salvesta_seadme_vool(nimi=seade, voolu_var=vool_var):
+                    try:
+                        seadmed[nimi] = int(voolu_var.get())
+                    except ValueError:
+                        messagebox.showerror("Viga", "Palun sisesta korrektne number.")
+
+                tk.Button(seadmete_raam, text="Muuda", command=salvesta_seadme_vool).grid(row=idx, column=2, padx=5,
+                                                                                          pady=2)
+
+                def eemalda_seade(nimi=seade):
+                    del seadmed[nimi]
+                    uuenda_seadmete_loend()
+
+                tk.Button(seadmete_raam, text="Eemalda", command=eemalda_seade).grid(row=idx, column=3, padx=5, pady=2)
+
+        uuenda_seadmete_loend()
+
+        def lisa_seade():
+            """Avab uue seadme lisamise akna."""
+            seade_aken = tk.Toplevel(andmete_aken)
+            seade_aken.title("Lisa uus seade")
+
+            tk.Label(seade_aken, text="Seadme nimi:").grid(row=0, column=0, padx=5, pady=5)
+            seade_nimi_var = tk.Entry(seade_aken)
+            seade_nimi_var.grid(row=0, column=1, padx=5, pady=5)
+
+            tk.Label(seade_aken, text="Vooluvajadus (W):").grid(row=1, column=0, padx=5, pady=5)
+            seade_vool_var = tk.Entry(seade_aken)
+            seade_vool_var.grid(row=1, column=1, padx=5, pady=5)
+
+            def salvesta_seade():
+                nimi = seade_nimi_var.get()
+                try:
+                    vool = int(seade_vool_var.get())
+                    if nimi and vool > 0:
+                        seadmed[nimi] = vool
+                        uuenda_seadmete_loend()
+                        seade_aken.destroy()
+                    else:
+                        messagebox.showerror("Viga", "Palun sisesta kehtiv nimi ja positiivne vooluvajadus.")
+                except ValueError:
+                    messagebox.showerror("Viga", "Palun sisesta korrektne number.")
+
+            tk.Button(seade_aken, text="Salvesta", command=salvesta_seade).grid(row=2, column=0, columnspan=2, pady=10)
+
+        tk.Button(andmete_aken, text="Lisa uus seade", command=lisa_seade).grid(row=4, column=0, columnspan=2, pady=10)
+
+        def arvuta_summa():
+            return sum(seadmed.values())
 
         def salvesta_andmed():
             taustafunktsioonid.muuda_nime(sonastik, punkti_nimi, nimi_var.get())
             taustafunktsioonid.muuda_gruppi(sonastik, punkti_nimi, grupp_var.get())
-            taustafunktsioonid.muuda_vooluvajadust(
-                sonastik, punkti_nimi, int(vooluvajadus_var.get()) if vooluvajadus_var.get().isdigit() else 0
-            )
-            taustafunktsioonid.muuda_kommentaari(sonastik, punkti_nimi, kommentaar_var.get())
-
+            taustafunktsioonid.muuda_vooluvajadust(sonastik, punkti_nimi, arvuta_summa())
+            taustafunktsioonid.muuda_seadmeid(sonastik, punkti_nimi, seadmed)
             self.uuenda_sonastiku_puu()
-            self.uuenda_punktid()  # Värskenda kaarti
-            self.canvas.delete("highlight")  # Eemalda ajutine highlight
+            self.uuenda_punktid()
             andmete_aken.destroy()
 
         def tühista():
-            # Ainult sulge dialoog, ära tee muudatusi ega kustuta punkti
-            self.canvas.delete("highlight")  # Eemalda highlight
             andmete_aken.destroy()
 
-        tk.Button(andmete_aken, text='Salvesta', command=salvesta_andmed).grid(row=4, column=0, padx=5, pady=10)
-        tk.Button(andmete_aken, text='Tühista', command=tühista).grid(row=4, column=1, padx=5, pady=10)
+        tk.Button(andmete_aken, text="Salvesta", command=salvesta_andmed).grid(row=5, column=0, padx=5, pady=10)
+        tk.Button(andmete_aken, text="Tühista", command=tühista).grid(row=5, column=1, padx=5, pady=10)
 
 
 ProgrammiGUI()
