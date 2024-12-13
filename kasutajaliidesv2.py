@@ -40,6 +40,7 @@ class ProgrammiGUI:
         self.mõõdulindi_jooned = []
         self.mõõdulindi_distantsid = []
         self.mõõdulindi_punktiloendur = 0
+        self.suurus = 19.67
         self.root = tk.Tk()
         self.root.geometry("1800x1000")
         self.root.title("Koordinaatide valimine")
@@ -179,11 +180,10 @@ class ProgrammiGUI:
             koordinaadid = punkt_data.get("koordinaat")
 
             if koordinaadid:
-                suurus = 20
                 # Highlight ainult valitud punkt
                 self.canvas.create_rectangle(
-                    koordinaadid[0] - suurus / 2, koordinaadid[1] - suurus / 2,
-                    koordinaadid[0] + suurus / 2, koordinaadid[1] + suurus / 2,
+                    koordinaadid[0] - self.suurus / 2, koordinaadid[1] - self.suurus / 2,
+                    koordinaadid[0] + self.suurus / 2, koordinaadid[1] + self.suurus / 2,
                     outline="purple", width=3, tags="highlight"
                 )
                 # Ava andmete muutmise dialoog
@@ -288,13 +288,12 @@ class ProgrammiGUI:
             return
 
         x, y = event.x, event.y
-        suurus = 10
 
         # Uuenda lõuendi elemendi koordinaate
         self.canvas.coords(
             self.valitud_canvas_id,
-            x - suurus / 2, y - suurus / 2,
-            x + suurus / 2, y + suurus / 2
+            x - self.suurus / 2, y - self.suurus / 2,
+            x + self.suurus / 2, y + self.suurus / 2
         )
 
         # Tõsta lõuendi element teiste kohale (valikuline)
@@ -405,10 +404,9 @@ class ProgrammiGUI:
         self.uuenda_sonastiku_puu()
 
     def highlight_punkt(self, x, y):
-        suurus = 15
         self.canvas.delete("highlight")
         self.canvas.create_rectangle(
-            x - suurus / 2, y - suurus / 2, x + suurus / 2, y + suurus / 2,
+            x - self.suurus / 2, y - self.suurus / 2, x + self.suurus / 2, y + self.suurus / 2,
             outline="purple", width=3, tags="highlight"
         )
 
@@ -428,12 +426,11 @@ class ProgrammiGUI:
             if "koordinaat" in andmed:
                 x, y = andmed["koordinaat"]
                 värv = andmed.get("värv", "#FF0000")  # Vaikimisi punane värv
-                suurus = 10
 
                 # Joonista punkt lõuendile ja salvesta lõuendi elemendi ID
                 item_id = self.canvas.create_rectangle(
-                    x - suurus / 2, y - suurus / 2,
-                    x + suurus / 2, y + suurus / 2,
+                    x - self.suurus / 2, y - self.suurus / 2,
+                    x + self.suurus / 2, y + self.suurus / 2,
                     fill=värv, outline="black", tags=(punkt_id, "punkt")
                 )
                 andmed['canvas_id'] = item_id  # Salvesta lõuendi elemendi ID
@@ -449,10 +446,9 @@ class ProgrammiGUI:
         sonastik[punkti_nimi]['värv'] = värv
 
         # Tee punkt kohe nähtavaks ja salvesta lõuendi elemendi ID
-        suurus = 10
         item_id = self.canvas.create_rectangle(
-            x - suurus / 2, y - suurus / 2,
-            x + suurus / 2, y + suurus / 2,
+            x - self.suurus / 2, y - self.suurus / 2,
+            x + self.suurus / 2, y + self.suurus / 2,
             fill=värv, outline="black", tags=(punkti_nimi, "punkt")
         )
         sonastik[punkti_nimi]['canvas_id'] = item_id  # Salvesta lõuendi elemendi ID
