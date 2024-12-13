@@ -34,8 +34,10 @@ class ProgrammiGUI:
         self.mõõdulindi_punktid = []
         self.mõõdulindi_jooned = []
         self.mõõdulindi_distantsid = []
+        self.mõõdulindi_summa = 0
+        self.summa_tekst = 0
         self.mõõdulindi_punktiloendur = 0
-        self.suurus = 19.67
+        self.suurus = 19.67 # suurus, mille järgi punktid moodustatakse. Hetkel tulevad punktid 3x3 meetrit
         self.root = tk.Tk()
         self.root.geometry("1800x1000")
         self.root.title("Koordinaatide valimine")
@@ -380,11 +382,15 @@ class ProgrammiGUI:
             vahemaa = round(math.dist(self.mõõdulindi_punktid[self.mõõdulindi_punktiloendur][1],
                                self.mõõdulindi_punktid[self.mõõdulindi_punktiloendur + 1][1]) / 6.536, 2
             )
+            self.mõõdulindi_summa += vahemaa
 
             # Kuvame canvasele kahe punkti vahelise distantsi
             vahemaa_tekst = self.canvas.create_text((self.mõõdulindi_punktid[self.mõõdulindi_punktiloendur][1][0] + self.mõõdulindi_punktid[self.mõõdulindi_punktiloendur + 1][1][0]) / 2,
                                ((self.mõõdulindi_punktid[self.mõõdulindi_punktiloendur][1][1] + self.mõõdulindi_punktid[self.mõõdulindi_punktiloendur + 1][1][1]) / 2) + 15,
                                text=(vahemaa, "m"), fill="black", font=("bold", 10))
+
+            self.canvas.delete(self.summa_tekst)
+            self.summa_tekst = self.canvas.create_text(1000, 650, text=f'Vahemaa kokku: {round(self.mõõdulindi_summa,2)}', fill='black', font=('bold', 15))
 
             self.mõõdulindi_distantsid.append(vahemaa_tekst)  # Lisame vahemaad listi, et neid saaks hiljem resettida
 
@@ -398,14 +404,16 @@ class ProgrammiGUI:
             self.canvas.delete(element)
         for element in self.mõõdulindi_distantsid:
             self.canvas.delete(element)
+        self.canvas.delete(self.summa_tekst)
 
         # Tühjendame mõõdulindiga seotud listid, et neid saaks uue mõõdulindi loomisel kasutada
         self.mõõdulindi_punktid.clear()
         self.mõõdulindi_jooned.clear()
         self.mõõdulindi_distantsid.clear()
 
-        # Nullime punktiloenduri
+        # Nullime punktiloenduri ja summa
         self.mõõdulindi_punktiloendur = 0
+        self.mõõdulindi_summa = 0
 
     def highlight_ja_muuda(self, event):
         # Leia lähim punkt
