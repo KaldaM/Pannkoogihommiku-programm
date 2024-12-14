@@ -606,6 +606,18 @@ class ProgrammiGUI:
         seadmete_raam = tk.Frame(andmete_aken)
         seadmete_raam.grid(row=3, column=0, columnspan=2, padx=5, pady=5)
 
+        # Kommenteermine ja selle raam
+        kommenteerimise_raam = tk.Frame(andmete_aken, width=300, height=300)
+        tk.Label(andmete_aken, text="Kommentaarid:").grid(row=5, column=0, padx=5, pady=5)
+        kommenteerimise_raam.grid(row=6, columnspan=2)
+        kommenteerimine_var = tk.Text(kommenteerimise_raam, wrap="word", width=40, height=20)
+        kommenteerimine_var.insert("1.0", sonastik[punkti_nimi].get("kommentaar", ""))
+        kommenteerimine_var.grid(row=0, column=0, padx=5, pady=5)
+
+        # Andme dialoogi salvestamisel kaasatakse ka kommenteerimine
+        def kommenteerimine():
+            return kommenteerimine_var.get("1.0", 'end-1c')
+
         def uuenda_seadmete_loend():
             """Uuendab seadmete nimekirja kuvamist."""
             for seade in seadmete_raam.winfo_children():
@@ -698,6 +710,8 @@ class ProgrammiGUI:
             taustafunktsioonid.muuda_gruppi(sonastik, punkti_nimi, grupp_var.get())
             taustafunktsioonid.muuda_vooluvajadust(sonastik, punkti_nimi, arvuta_summa())
             taustafunktsioonid.muuda_seadmeid(sonastik, punkti_nimi, seadmed)
+            kommentaar = kommenteerimine()
+            taustafunktsioonid.muuda_kommentaari(sonastik, punkti_nimi, kommentaar)
             self.uuenda_sonastiku_puu()
             self.uuenda_punktid()
             andmete_aken.destroy()
@@ -705,8 +719,8 @@ class ProgrammiGUI:
         def tühista():
             andmete_aken.destroy()
 
-        tk.Button(andmete_aken, text="Salvesta", command=salvesta_andmed).grid(row=5, column=0, padx=5, pady=10)
-        tk.Button(andmete_aken, text="Tühista", command=tühista).grid(row=5, column=1, padx=5, pady=10)
+        tk.Button(andmete_aken, text="Salvesta", command=salvesta_andmed).grid(row=12, column=0, padx=5, pady=10)
+        tk.Button(andmete_aken, text="Tühista", command=tühista).grid(row=12, column=1, padx=5, pady=10)
 
     def naita_kapi_punkte(self, kapp_id):
         kapi_aken = tk.Toplevel(self.root)
