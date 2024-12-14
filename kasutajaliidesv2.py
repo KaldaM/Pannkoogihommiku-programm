@@ -50,6 +50,7 @@ class ProgrammiGUI:
         self.filemenu.add_command(label='Close', command=exit)
         self.filemenu.add_command(label='Impordi', command=self.impordi_sonastik)
         self.filemenu.add_command(label='Salvesta', command=self.expordi_sonastik)
+        self.filemenu.add_command(label='Kirjuta andmed tekstina', command=self.kirjuta_tekst)
 
         self.kujundus = tk.Menu(self.menubar, tearoff=0)
         self.kujundus.add_command(label='Vaheta ortofotole', command=self.vaheta_ortofoto)
@@ -396,7 +397,7 @@ class ProgrammiGUI:
             # Kuvame canvasele kahe punkti vahelise distantsi
             vahemaa_tekst = self.canvas.create_text((self.mõõdulindi_punktid[self.mõõdulindi_punktiloendur][1][0] + self.mõõdulindi_punktid[self.mõõdulindi_punktiloendur + 1][1][0]) / 2,
                                ((self.mõõdulindi_punktid[self.mõõdulindi_punktiloendur][1][1] + self.mõõdulindi_punktid[self.mõõdulindi_punktiloendur + 1][1][1]) / 2) + 15,
-                               text=(vahemaa, "m"), fill="black", font=("bold", 10))
+                               text=f'{vahemaa} m', fill="black", font=("bold", 10))
 
             self.canvas.delete(self.summa_tekst)
             self.summa_tekst = self.canvas.create_text(1000, 650, text=f'Vahemaa kokku: {round(self.mõõdulindi_summa,2)}', fill='black', font=('bold', 15))
@@ -476,6 +477,15 @@ class ProgrammiGUI:
         if salvestuskoht:
             global sonastik
             taustafunktsioonid.salvesta_faili(sonastik, salvestuskoht)
+
+
+    def kirjuta_tekst(self):
+        salvestuskoht = filedialog.askopenfilename(title='Vali fail', filetypes=[('txt failid', '*.txt'), ('All Files', '.*')])
+
+        if salvestuskoht:
+            global sonastik
+            taustafunktsioonid.koik_andmed_teksti(sonastik, salvestuskoht)
+
 
 
     def vaheta_ortofoto(self):

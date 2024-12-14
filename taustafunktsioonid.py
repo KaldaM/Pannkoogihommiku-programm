@@ -101,3 +101,23 @@ def uuenda_grupi_esemeid(sonastik):
                     sonastik[grupp]['grupi vajalikud esemed'][ese] += kogus
                 else:
                     sonastik[grupp]['grupi vajalikud esemed'][ese] = kogus
+
+
+def koik_andmed_teksti(sonastik, failinimi):
+    print('Hello world')
+    with open(failinimi, 'w', encoding='utf-8') as fail:
+        for grupp, andmed in sonastik.items():
+            if 'grupp' not in andmed:
+                fail.write(f'Grupp: {grupp}\n')
+                fail.write(f'Grupi vooluvajadus {andmed["grupi vooluvajadus"]}\n')
+                fail.write(f'Gruppi kuuluvad punktid:\n')
+                for punkt2, andmed2 in sonastik.items():
+                    if andmed2['grupp'] == grupp:
+                        fail.write(f'Nimi: {andmed2['nimi']}\n')
+                        fail.write(f'Elektrikapp: {andmed2['kapp']}\n')
+                        fail.write(f'Vooluvajadus kokku: {andmed2['vooluvajadus']}\n')
+                        fail.write(f'Seadmed:\n')
+                        for seade in andmed2['seadmed']:
+                            fail.write(f'{seade}: {andmed2['seadmed'][seade]}W\n')
+                        fail.write(f'Kommentaarid:\n')
+                        fail.write(f'{andmed2['kommentaar']}\n\n')
