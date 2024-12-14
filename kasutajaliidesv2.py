@@ -225,7 +225,10 @@ class ProgrammiGUI:
                     outline="purple", width=3, tags="highlight"
                 )
                 # Ava andmete muutmise dialoog
-                self.andme_dialog(punkt_id, koordinaadid, punkt_data.get("värv", "#FFFFFF"))
+                if punkt_id.startswith('kapp'):
+                    self.naita_kapi_punkte(punkt_id)
+                else:
+                    self.andme_dialog(punkt_id, koordinaadid, punkt_data.get("värv", "#FFFFFF"))
 
 
     #Vasaku hiireklõpsu funktsioonid:
@@ -422,9 +425,13 @@ class ProgrammiGUI:
             if "koordinaat" in andmed:
                 x, y = andmed["koordinaat"]
                 if abs(x - event.x) < 10 and abs(y - event.y) < 10:  # Kui klõps on punkti lähedal
-                    self.highlight_punkt(x, y)  # Highlight punkt
-                    self.andme_dialog(punkt_id, (x, y), andmed.get("värv", "#FFFFFF"))  # Ava andmete dialoog
-                    break
+                    if punkt_id.startswith('kapp'):
+                        self.naita_kapi_punkte(punkt_id)
+                        return
+                    else:
+                        self.highlight_punkt(x, y)  # Highlight punkt
+                        self.andme_dialog(punkt_id, (x, y), andmed.get("värv", "#FFFFFF"))  # Ava andmete dialoog
+                        break
 
 
     def impordi_sonastik(self):
@@ -518,6 +525,13 @@ class ProgrammiGUI:
             for punkt in list(sonastik.keys()):
                 if punkt.startswith('punkt') and punktikese == tuple(sonastik[punkt]["koordinaat"]):
                     if messagebox.askyesno(title='Kustuta?', message=f"Kas oled kindel, et soovid {sonastik[punkt]['nimi']} eemaldada?"):
+                        # Kapile voolu taastamine
+                        seotud_kapp = sonastik[punkt].get('kapp', '')
+                        if seotud_kapp:
+                            for kapp_id, kapp_andmed in sonastik.items():
+                                if kapp_andmed.get('nimi') == seotud_kapp:
+                                    kapp_andmed['vooluvajadus'] += sonastik[punkt]['vooluvajadus']
+
                         # Eemalda ruut lõuendilt ja sõnastikust
                         self.canvas.delete(kustutatav)
                         grupp = sonastik[punkt]['grupp']
@@ -577,8 +591,15 @@ class ProgrammiGUI:
         grupp_var.insert(0, sonastik[punkti_nimi].get("grupp", ""))
         grupp_var.grid(row=1, column=1, padx=5, pady=5)
 
+        tk.Label(andmete_aken, text="Elektrikapp:").grid(row=2, column=0, padx=5, pady=5)
+        kapp_var = tk.StringVar()
+        kapp_valikud = [""] + [sonastik[k]["nimi"] for k in sonastik if k.startswith("kapp")]
+        kapp_menu = ttk.Combobox(andmete_aken, textvariable=kapp_var, values=kapp_valikud)
+        kapp_menu.set(sonastik[punkti_nimi].get("kapp", ""))
+        kapp_menu.grid(row=2, column=1, padx=5, pady=5)
+
         # Seadmed ja vooluvajadus
-        tk.Label(andmete_aken, text="Seadmed ja nende vool (W):").grid(row=2, column=0, padx=5, pady=5)
+        tk.Label(andmete_aken, text="Seadmed ja nende vool (W):").grid(row=3, column=0, padx=5, pady=5)
         seadmed = sonastik[punkti_nimi].get("seadmed", {})
 
         # Seadmete haldamise raamistik
@@ -618,6 +639,8 @@ class ProgrammiGUI:
             seade_aken = tk.Toplevel(andmete_aken)
             seade_aken.title("Lisa uus seade")
 
+            seade_aken.attributes('-topmost', True)
+
             tk.Label(seade_aken, text="Seadme nimi:").grid(row=0, column=0, padx=5, pady=5)
             seade_nimi_var = tk.Entry(seade_aken)
             seade_nimi_var.grid(row=0, column=1, padx=5, pady=5)
@@ -647,6 +670,30 @@ class ProgrammiGUI:
             return sum(seadmed.values())
 
         def salvesta_andmed():
+            # Kapiga seonduv
+            vana_kapp = sonastik[punkti_nimi].get("kapp", "")
+            uus_kapp = kapp_var.get()
+            olemasolevad_kapid = [sonastik[k].get("nimi") for k in sonastik if k.startswith("kapp")]
+
+            if uus_kapp and uus_kapp not in olemasolevad_kapid:
+                messagebox.showerror("Viga", f"Elektrikapp '{uus_kapp}' ei eksisteeri!")
+                return  # Tühista muudatus
+
+            if vana_kapp:
+                for k in sonastik:
+                    if sonastik[k].get("nimi") == vana_kapp:
+                        sonastik[k]["vooluvajadus"] += sonastik[punkti_nimi]["vooluvajadus"]
+
+            if not uus_kapp:
+                sonastik[punkti_nimi]['kapp'] = ''
+
+            elif uus_kapp:
+                for k in sonastik:
+                    if sonastik[k].get("nimi") == uus_kapp:
+                        sonastik[k]["vooluvajadus"] -= arvuta_summa()
+                        sonastik[punkti_nimi]["kapp"] = uus_kapp
+
+            # Ülejäänud andmete salvestamine
             taustafunktsioonid.muuda_nime(sonastik, punkti_nimi, nimi_var.get())
             taustafunktsioonid.muuda_gruppi(sonastik, punkti_nimi, grupp_var.get())
             taustafunktsioonid.muuda_vooluvajadust(sonastik, punkti_nimi, arvuta_summa())
@@ -660,6 +707,21 @@ class ProgrammiGUI:
 
         tk.Button(andmete_aken, text="Salvesta", command=salvesta_andmed).grid(row=5, column=0, padx=5, pady=10)
         tk.Button(andmete_aken, text="Tühista", command=tühista).grid(row=5, column=1, padx=5, pady=10)
+
+    def naita_kapi_punkte(self, kapp_id):
+        kapi_aken = tk.Toplevel(self.root)
+        kapi_aken.title(f"Punktid kapis: {sonastik[kapp_id]['nimi']}")
+
+        tk.Label(kapi_aken, text=f"Elektrikapp: {sonastik[kapp_id]['nimi']}").pack(pady=5)
+
+        punktide_loetelu = tk.Listbox(kapi_aken, width=50, height=15)
+        punktide_loetelu.pack(padx=10, pady=10)
+
+        for punkt_id, andmed in sonastik.items():
+            if andmed.get("kapp") == sonastik[kapp_id]["nimi"]:
+                punktide_loetelu.insert(tk.END, f"{andmed['nimi']} - {andmed['vooluvajadus']}W")
+
+        tk.Button(kapi_aken, text="Sulge", command=kapi_aken.destroy).pack(pady=10)
 
 
 ProgrammiGUI()
