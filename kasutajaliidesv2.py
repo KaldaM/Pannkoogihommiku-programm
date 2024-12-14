@@ -49,9 +49,14 @@ class ProgrammiGUI:
         self.filemenu = tk.Menu(self.menubar, tearoff=0)
         self.filemenu.add_command(label='Close', command=exit)
         self.filemenu.add_command(label='Impordi', command=self.impordi_sonastik)
-        self.filemenu.add_command(label='Salvesta', command =self.expordi_sonastik)
+        self.filemenu.add_command(label='Salvesta', command=self.expordi_sonastik)
+
+        self.kujundus = tk.Menu(self.menubar, tearoff=0)
+        self.kujundus.add_command(label='Vaheta ortofotole', command=self.vaheta_ortofoto)
+        self.kujundus.add_command(label='Vaheta tavakaardile', command=self.vaheta_tavakaart)
 
         self.menubar.add_cascade(menu=self.filemenu, label='File')
+        self.menubar.add_cascade(menu=self.kujundus, label='Kujundus')
 
         self.root.config(menu=self.menubar)
 
@@ -79,8 +84,9 @@ class ProgrammiGUI:
         self.canvas.place(relx=0.01, rely=0.05, anchor="nw")
 
         # canvasele kaardipildi panemine
-        self.kaardipilt = ImageTk.PhotoImage(Image.open("kaart.png"))
-        self.canvas.create_image(648, 348.5, image=self.kaardipilt)
+        self.kaardipilt = ImageTk.PhotoImage(Image.open("tavakaart.png"))
+        self.ortofoto = ImageTk.PhotoImage(Image.open('ortofoto.png'))
+        self.canvas.create_image(648, 348.5, image=self.kaardipilt, tags='kaart')
 
         # Treeview info kuvamiseks
         self.tree = ttk.Treeview(self.root)
@@ -470,6 +476,17 @@ class ProgrammiGUI:
         if salvestuskoht:
             global sonastik
             taustafunktsioonid.salvesta_faili(sonastik, salvestuskoht)
+
+
+    def vaheta_ortofoto(self):
+        self.canvas.delete('kaart')
+        self.canvas.create_image(648, 348.5, image=self.ortofoto, tags='kaart')
+        self.canvas.tag_lower('kaart')  # Aseta kaardikiht lõuendi kõige alla
+
+    def vaheta_tavakaart(self):
+        self.canvas.delete('kaart')
+        self.canvas.create_image(648, 348.5, image=self.kaardipilt, tags='kaart')
+        self.canvas.tag_lower('kaart')  # Aseta kaardikiht lõuendi kõige alla
 
     def uuenda_punktid(self):
         # Eemalda kõik punktid lõuendilt
