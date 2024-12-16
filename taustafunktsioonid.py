@@ -1,6 +1,6 @@
-import json
+import json # Vajaliku andmete salvestamiseks ilusas formaadis
 
-
+# Teeb sõnastikku vajalikud punktid
 def lisa_sonastikku(sonastik, punkti_nimi):
     sonastik[punkti_nimi] = {
         'nimi': '',
@@ -10,15 +10,11 @@ def lisa_sonastikku(sonastik, punkti_nimi):
         'vooluvajadus': 0,
         'seadmed': {},
         'kommentaar': '',
-        'vajalikud esemed': {}
     }
+
 
 def muuda_nime(sonastik, punkti_nimi, nimi):
     sonastik[punkti_nimi]['nimi'] = nimi
-
-
-def muuda_koordinaate(sonastik, punkti_nimi, koordinaat):
-    sonastik[punkti_nimi]['koordinaat'] = koordinaat
 
 
 def muuda_varvi(sonastik, punkti_nimi, varv):
@@ -30,11 +26,10 @@ def muuda_gruppi(sonastik, punkti_nimi, grupp):
     if grupp:
         if grupp not in sonastik:
             sonastik[grupp] = {
-                'grupi vooluvajadus': 0,
-                'grupi vajalikud esemed': {}
+                'grupi vooluvajadus': 0
             }
     uuenda_grupi_vooluvajadust(sonastik)
-    uuenda_grupi_esemeid(sonastik)
+
 
 def muuda_vooluvajadust(sonastik, punkti_nimi, vooluvajadus):
     sonastik[punkti_nimi]['vooluvajadus'] = vooluvajadus
@@ -49,60 +44,28 @@ def muuda_kommentaari(sonastik, punkti_nimi, kommentaar):
     sonastik[punkti_nimi]['kommentaar'] = kommentaar
 
 
-def muuda_vajalike_esemeid(sonastik, punkti_nimi, vajalikud_esemed):
-    sonastik[punkti_nimi]['vajalikud esemed'] = vajalikud_esemed
-
-
-def lisa_vajalik_ese(sonastik, punkti_nimi, vajalik_ese, kogus = 1):
-    if vajalik_ese in sonastik[punkti_nimi]['vajalikud esemed']:
-        sonastik[punkti_nimi]['vajalikud esemed'][vajalik_ese] += kogus
-    else:
-        sonastik[punkti_nimi]['vajalikud esemed'][vajalik_ese] = kogus
-    uuenda_grupi_esemeid(sonastik)
-
-
+ # Kirjutab ilusas ilusas formaadid sõnastiku faili
 def salvesta_faili(sonastik, failinimi):
     fail = open(failinimi, 'w', encoding='utf-8')
     json.dump(sonastik, fail, ensure_ascii=False, indent=4)
-    fail.close
+    fail.close()
     print('Salvestati')
-
-def impordi(failinimi):
-    with open(failinimi, 'r', encoding='utf-8') as fail:
-        global sonastik
-        sonastik = json.load(fail)
 
 
 def uuenda_grupi_vooluvajadust(sonastik):
-    # nulli grupi vooluvajaduse
+    # nullib grupi vooluvajaduse
     for voti in sonastik:
         if isinstance(sonastik[voti], dict) and 'grupi vooluvajadus' in sonastik[voti]:
             sonastik[voti]['grupi vooluvajadus'] = 0
 
-    #arvutab iga grupi vooluvajaduse
+    #arvutab iga grupi vooluvajaduse uuesti
     for punkt, andmed in sonastik.items():
         if 'grupp' in andmed and andmed['grupp'] in sonastik:
             grupp = andmed['grupp']
             sonastik[grupp]['grupi vooluvajadus'] += int(andmed.get('vooluvajadus', 0))
 
 
-def uuenda_grupi_esemeid(sonastik):
-    # nulli grupi vooluvajaduse
-    for voti in sonastik:
-        if isinstance(sonastik[voti], dict) and 'grupi vajalikud esemed' in sonastik[voti]:
-            sonastik[voti]['grupi vajalikud esemed'] = {}
-
-    # arvutab iga grupi vooluvajaduse
-    for punkt, andmed in sonastik.items():
-        if 'grupp' in andmed and andmed['grupp'] in sonastik:
-            grupp = andmed['grupp']
-            for ese, kogus in andmed.get('vajalikud esemed', {}).items():
-                if ese in sonastik[grupp]['grupi vajalikud esemed']:
-                    sonastik[grupp]['grupi vajalikud esemed'][ese] += kogus
-                else:
-                    sonastik[grupp]['grupi vajalikud esemed'][ese] = kogus
-
-
+# Kirjutab sõnastikus olevad andmed kergesti loetavalt nii, et ei kuva ebavajalikku informatsiooni
 def koik_andmed_teksti(sonastik, failinimi):
     with open(failinimi, 'w', encoding='utf-8') as fail:
         maaramata_grupp = False
@@ -161,7 +124,7 @@ def koik_andmed_teksti(sonastik, failinimi):
                             fail.write(f'   {seade}: {andmed2['seadmed'][seade]}W\n')
                     if andmed2['kommentaar'] != '':
                         fail.write(f'Kommentaarid:\n')
-                        read = andmed2['kommentaar'].split('\\\\\\')
+                        read = andmed2['kommentaar'].split('\n')
                         for rida in read:
                             fail.write(f'   {rida.strip()}\n')
                         fail.write('\n')

@@ -39,7 +39,7 @@ class ProgrammiGUI:
         self.mõõdulindi_punktiloendur = 0
         self.suurus = 19.60 # suurus, mille järgi punktid moodustatakse. Hetkel tulevad punktid 3x3 meetrit
         self.root = tk.Tk()
-        self.root.geometry("1800x1000")
+        self.root.state('zoomed') # alustab progammi täissuuruses
         self.root.title("Koordinaatide valimine")
 
 
@@ -105,13 +105,13 @@ class ProgrammiGUI:
 
         # Nupud punktide lisamise ja liigutamise aktiveerimiseks ning mõõdulindi funktsiooni käivitamiseks
         self.mõõdulint_nupp = tk.Button(self.root, text="Mõõdulint", command=self.aktiveeri_mõõdulint)
-        self.mõõdulint_nupp.place(relx=0.59, rely=0.78, anchor="se")
+        self.mõõdulint_nupp.place(relx=0.53, rely=0.78, anchor="center")
 
         self.lisa_nupp = tk.Button(self.root, text="Lisa punkte", command=self.aktiveeri_lisamine)
-        self.lisa_nupp.place(relx=0.65, rely=0.78, anchor="se")
+        self.lisa_nupp.place(relx=0.65, rely=0.78, anchor="center")
 
         self.liiguta_nupp = tk.Button(self.root, text="Liiguta punkte", command=self.aktiveeri_liigutamine)
-        self.liiguta_nupp.place(relx=0.72, rely=0.78, anchor="se")
+        self.liiguta_nupp.place(relx=0.59, rely=0.78, anchor="center")
 
 
         # Canvase sündmuste sidumine
@@ -123,10 +123,12 @@ class ProgrammiGUI:
 
         self.tree.bind("<<TreeviewSelect>>", self.treeview_item_selected)
 
+        # Lisab canvasele programmi käivitamisel kappide asukohad, mis ei ole eemaldatavad ega liigutatavad
         self.lisa_kapid()
         self.valitud_canvas_id = None
 
         self.root.mainloop()
+
 
     def lisa_kapid(self):
         """Lisab kaardile 7 elektrikappi, millest 2 on punased (32A) ja ülejäänud sinised."""
@@ -139,7 +141,7 @@ class ProgrammiGUI:
             {"nimi": "PVK 7", "koordinaat": (573, 262), "vool": 22000, "värv": "#FF0000"},
             {"nimi": "PVK 6", "koordinaat": (766, 210), "vool": 11000, "värv": "#0000FF"},
         ]
-
+        # lisab kapile numbri alustades ühest
         for idx, kapp in enumerate(kapid, start=1):
             punkti_nimi = f'kapp{idx}'
             sonastik[punkti_nimi] = {
@@ -150,7 +152,7 @@ class ProgrammiGUI:
                 "grupp": "Kapid",
             }
 
-            # Joonista ring kaardile
+            # Joonistab ringid kaardile
             ringi_suurus = 14
 
             item_id = self.canvas.create_oval(
@@ -165,7 +167,7 @@ class ProgrammiGUI:
         self.uuenda_sonastiku_puu()
 
 
-
+    # TreeView ei uuenda oma andmeid automaatselt sõnastiku kaudu, nii et seda tuleb teha funktsiooni abil
     def uuenda_sonastiku_puu(self):
         self.tree.delete(*self.tree.get_children())  # Tühjenda TreeView
 
@@ -196,7 +198,7 @@ class ProgrammiGUI:
                     vool = andmed.get("vooluvajadus", 0)
                     punkt_tekst = f"{nimi} - Vool: {vool}W"
                     värv = andmed.get("värv", "#FFFFFF")
-                    self.tree.tag_configure(punkt_id, background=värv)
+                    self.tree.tag_configure(punkt_id, background=värv) # Lisab TreeViews punktile selle värvi, mis sellel ka kaardil on
                     self.tree.insert(grupi_node_id[grupp], "end", text=punkt_tekst, iid=punkt_id, tags=(punkt_id,))
 
         # Nüüd lisame määramata grupi
@@ -214,6 +216,7 @@ class ProgrammiGUI:
                     self.tree.insert(maaramata_node, "end", text=punkt_tekst, iid=punkt_id, tags=(punkt_id,))
 
 
+    # Highlightib kaardil punkti, mis TreeView kaudu valiti
     def treeview_item_selected(self, event):
         self.canvas.delete("highlight")  # Eemalda ainult highlight kastid
 
@@ -226,16 +229,12 @@ class ProgrammiGUI:
 
             if koordinaadid:
                 # Highlight ainult valitud punkt
-                self.canvas.create_rectangle(
-                    koordinaadid[0] - self.suurus / 2, koordinaadid[1] - self.suurus / 2,
-                    koordinaadid[0] + self.suurus / 2, koordinaadid[1] + self.suurus / 2,
-                    outline="purple", width=3, tags="highlight"
-                )
+                self.highlight_punkt(koordinaadid[0], koordinaadid[1])
                 # Ava andmete muutmise dialoog
                 if punkt_id.startswith('kapp'):
                     self.naita_kapi_punkte(punkt_id)
                 else:
-                    self.andme_dialog(punkt_id, koordinaadid, punkt_data.get("värv", "#FFFFFF"))
+                    self.andme_dialog(punkt_id)
 
 
     #Vasaku hiireklõpsu funktsioonid:
@@ -253,6 +252,7 @@ class ProgrammiGUI:
             self.mõõdulint_nupp.config(text="Mõõdulint")
         self.valitud_punkt = None  # Eemaldame aktiivse valiku
 
+    # aktiveerib lisamise võimaluse ning muudab nuppude tekste
     def aktiveeri_lisamine(self):
         self.lisamine_aktiivne = not self.lisamine_aktiivne
         self.eemaldamine_aktiivne = True
@@ -265,6 +265,7 @@ class ProgrammiGUI:
             self.lisa_nupp.config(text="Lisamine: Aktiivne")
         else:
             self.lisa_nupp.config(text="Lisa punkte")
+
 
     def aktiveeri_liigutamine(self):
         self.liigutamine_aktiivne = not self.liigutamine_aktiivne
@@ -281,24 +282,8 @@ class ProgrammiGUI:
         self.valitud_punkt = None  # Eemaldame aktiivse valiku
 
 
-        def vali_punkt(self, event):
-            if not self.liigutamine_aktiivne:
-                return
-
-            # Leia lähim punkt koordinaatide järgi
-            valitud_id = self.canvas.find_closest(event.x, event.y)
-            for punkt_id, andmed in sonastik.items():
-                if "koordinaat" in andmed:
-                    x, y = andmed["koordinaat"]
-                    if abs(x - event.x) < 10 and abs(y - event.y) < 10:  # Kui klõps on punkti lähedal
-                        self.valitud_punkt = punkt_id
-                        self.highlight_punkt(x, y)
-                        break
-
-
     # Parema hiireklõpsu funktsioonid eraldi (kui neid tuleb, praegu on kõik paralleelselt vasaku hiireklõpsu funktsioonidega):
     # ...
-
     def canvas_vasakklikk(self, event):
         if self.lisamine_aktiivne:
             self.lisa_ruut(event)  # Kui lisamine on aktiivne, lisa punkt
@@ -309,6 +294,7 @@ class ProgrammiGUI:
         else:
             self.highlight_ja_muuda(event)  # Kui ükski pole aktiivne, highlight ja ava andmete muutmine
 
+
     def canvas_paremklikk(self, event):
         if self.mõõdulindi_reset_aktiivne:
             self.mõõdulindi_reset()
@@ -318,7 +304,7 @@ class ProgrammiGUI:
 
     def vali_punkt(self, event):
         if not self.liigutamine_aktiivne:
-            return
+            return # teeb nii, et ei hakkaks punkti liigutama, kui me seda ei taha
 
         # Leia lähim lõuendi element
         valitud_id = self.canvas.find_closest(event.x, event.y)
@@ -331,12 +317,13 @@ class ProgrammiGUI:
                 self.valitud_canvas_id = item_id
                 break
 
+
     def lohista_punkt(self, event):
         if not self.liigutamine_aktiivne or not self.valitud_punkt:
-            return
+            return # kontrollib, kas soovime lohistada
 
         if 'kapp' in self.canvas.gettags(self.valitud_canvas_id):
-            return
+            return # eemaldab kappide liigutamise võimaluse
 
         x, y = event.x, event.y
 
@@ -353,6 +340,7 @@ class ProgrammiGUI:
         # Uuenda sõnastikus punkti koordinaate
         sonastik[self.valitud_punkt]['koordinaat'] = (x, y)
 
+
     def lohistamise_lopp(self, event):
         if not self.liigutamine_aktiivne or not self.valitud_punkt or not self.mõõdulint_aktiivne:
             return
@@ -363,6 +351,7 @@ class ProgrammiGUI:
         self.valitud_punkt = None
         self.valitud_canvas_id = None
         self.uuenda_punktid()  # Värskenda kõiki punkte kaardil
+
 
     def mõõdulint(self, event):
         x, y = event.x, event.y
@@ -406,6 +395,7 @@ class ProgrammiGUI:
 
             self.mõõdulindi_punktiloendur += 1
 
+
     def mõõdulindi_reset(self):
         # Kustutame canvaselt kõik mõõdulindiga seotud elemendid
         for element in self.mõõdulindi_punktid:
@@ -425,22 +415,23 @@ class ProgrammiGUI:
         self.mõõdulindi_punktiloendur = 0
         self.mõõdulindi_summa = 0
 
+
     def highlight_ja_muuda(self, event):
         # Leia lähim punkt
-        valitud_id = self.canvas.find_closest(event.x, event.y)
         for punkt_id, andmed in sonastik.items():
             if "koordinaat" in andmed:
                 x, y = andmed["koordinaat"]
                 if abs(x - event.x) < 10 and abs(y - event.y) < 10:  # Kui klõps on punkti lähedal
                     if punkt_id.startswith('kapp'):
                         self.naita_kapi_punkte(punkt_id)
-                        return
+                        return # Teeb nii, et kapil vajutamine ei avaks andme dialogi
                     else:
                         self.highlight_punkt(x, y)  # Highlight punkt
-                        self.andme_dialog(punkt_id, (x, y), andmed.get("värv", "#FFFFFF"))  # Ava andmete dialoog
+                        self.andme_dialog(punkt_id)  # Ava andmete dialoog
                         break
 
 
+    # Võimaldab kasutajal valida .txt fail, millele on kirjutatud sõnastik, mida importida
     def impordi_sonastik(self):
         failitee = filedialog.askopenfilename(title='Vali fail', filetypes=[('txt failid', '*.txt'), ('All Files', '.*')])
 
@@ -453,6 +444,7 @@ class ProgrammiGUI:
                 print('Andmed imporditud', sonastik)
                 self.uuenda_punktid()
 
+
         # Leia suurim olemasolev punktinumber ja uuenda punkti_loendur
         punktinumbrid = [
             int(key.split('-')[1]) for key in sonastik.keys() if key.startswith("punkt-") and key.split('-')[1].isdigit()
@@ -464,6 +456,8 @@ class ProgrammiGUI:
 
         self.uuenda_sonastiku_puu()
 
+
+    # Teeb lilla ruudu ümber punkti ning kustutab enne eelmise highlighti ära
     def highlight_punkt(self, x, y):
         self.canvas.delete("highlight")
         self.canvas.create_rectangle(
@@ -471,6 +465,8 @@ class ProgrammiGUI:
             outline="purple", width=3, tags="highlight"
         )
 
+
+    # Taustafunktsiooni abil dumpib json abil sõnastiku kasutaja valitud .txt faili
     def expordi_sonastik(self):
         salvestuskoht = filedialog.askopenfilename(title='Vali fail', filetypes=[('txt failid', '*.txt'), ('All Files', '.*')])
 
@@ -487,17 +483,21 @@ class ProgrammiGUI:
             taustafunktsioonid.koik_andmed_teksti(sonastik, salvestuskoht)
 
 
-
+    # Vahetab kaardi satelliitpildile
     def vaheta_ortofoto(self):
         self.canvas.delete('kaart')
         self.canvas.create_image(648, 348.5, image=self.ortofoto, tags='kaart')
         self.canvas.tag_lower('kaart')  # Aseta kaardikiht lõuendi kõige alla
 
+
+    # Vahetab kaardi elektriskeemidega puhtale kaardile
     def vaheta_tavakaart(self):
         self.canvas.delete('kaart')
         self.canvas.create_image(648, 348.5, image=self.kaardipilt, tags='kaart')
         self.canvas.tag_lower('kaart')  # Aseta kaardikiht lõuendi kõige alla
 
+
+    # Kuna Tkinter automaatselt punkte ei uuenda, tuleb seda teha funktsiooni abil
     def uuenda_punktid(self):
         # Eemalda kõik punktid lõuendilt
         self.canvas.delete('punkt')
@@ -516,13 +516,15 @@ class ProgrammiGUI:
                 )
                 andmed['canvas_id'] = item_id  # Salvesta lõuendi elemendi ID
 
+
+    # Võimaldab 3x3 meetriseid ruute lisada kaardile. Need peaksid kujutama telke.
     def lisa_ruut(self, event):
         x, y = event.x, event.y
         värv = "#FF0000"  # Vaikimisi punane värv
         punkti_nimi = f'punkt-{self.punkti_loendur}'
 
         # Lisa punkt sõnastikku
-        taustafunktsioonid.lisa_sonastikku(sonastik, punkti_nimi)
+        taustafunktsioonid.lisa_sonastikku(sonastik, punkti_nimi) # Loob sõnastikus õiged kategooriad
         sonastik[punkti_nimi]['koordinaat'] = (x, y)
         sonastik[punkti_nimi]['värv'] = värv
 
@@ -537,43 +539,44 @@ class ProgrammiGUI:
         self.punkti_loendur += 1
         self.uuenda_sonastiku_puu()  # Värskenda TreeView
 
+    # Eemaldab kaardilt punkti
     def eemalda_ruut(self, event):
         if not self.eemaldamine_aktiivne:
             return
-
 
         kustutatav = self.canvas.find_closest(event.x, event.y)[0]
         vajutatud_punkt = self.canvas.coords(kustutatav)
         punktikese_x = (vajutatud_punkt[0] + vajutatud_punkt[2]) / 2
         punktikese_y = (vajutatud_punkt[1] + vajutatud_punkt[3]) / 2
-        punktikese = (int(punktikese_x), int(punktikese_y))
+        punktikese_koordinaadid = (int(punktikese_x), int(punktikese_y))
 
-        try:
-            for punkt in list(sonastik.keys()):
-                if punkt.startswith('punkt') and punktikese == tuple(sonastik[punkt]["koordinaat"]):
-                    if messagebox.askyesno(title='Kustuta?', message=f"Kas oled kindel, et soovid {sonastik[punkt]['nimi']} eemaldada?"):
-                        # Kapile voolu taastamine
-                        seotud_kapp = sonastik[punkt].get('kapp', '')
-                        if seotud_kapp:
-                            for kapp_id, kapp_andmed in sonastik.items():
-                                if kapp_andmed.get('nimi') == seotud_kapp:
-                                    kapp_andmed['vooluvajadus'] += sonastik[punkt]['vooluvajadus']
 
-                        # Eemalda ruut lõuendilt ja sõnastikust
-                        self.canvas.delete(kustutatav)
-                        grupp = sonastik[punkt]['grupp']
-                        del sonastik[punkt]
+        for punkt in list(sonastik.keys()):
+            if punkt.startswith('punkt') and punktikese_koordinaadid == tuple(sonastik[punkt]["koordinaat"]):
+                punkti_nimi = sonastik[punkt]['nimi']
+                if punkti_nimi == '':
+                    punkti_nimi = punkt # Teeb nii, et kui punktile pole nime määratud, on punki nimeks selle sõnastiku võti
+                if messagebox.askyesno(title='Kustuta?', message=f"Kas oled kindel, et soovid {punkti_nimi} eemaldada?"): # Küsib kasutajalt üle, kas ta soovib ikka punkti kustutada
+                    # Kapile voolu taastamine
+                    seotud_kapp = sonastik[punkt].get('kapp', '')
+                    if seotud_kapp:
+                        for kapp_id, kapp_andmed in sonastik.items():
+                            if kapp_andmed.get('nimi') == seotud_kapp:
+                                kapp_andmed['vooluvajadus'] += sonastik[punkt]['vooluvajadus'] # Tagastab voolu, mis punkti kapilt nõudis
 
-                        # Kontrolli, kas grupp on tühi, ja eemalda see
-                        if grupp and grupp in sonastik:
-                            grupi_punktid = [p for p in sonastik if sonastik[p].get('grupp') == grupp]
-                            if not grupi_punktid:  # Kui grupis pole enam punkte
-                                del sonastik[grupp]
-                                print(f"Grupp {grupp} on kustutatud, sest see on tühi.")
-                        break
-        except:
-            print("Sõnastik läbitud")
-            print(sonastik)
+                    # Eemalda ruut lõuendilt ja sõnastikust
+                    self.canvas.delete(kustutatav)
+                    self.canvas.delete("highlight")
+                    grupp = sonastik[punkt]['grupp']
+                    del sonastik[punkt]
+
+                    # Kontrolli, kas grupp on tühi, ja eemalda see
+                    if grupp and grupp in sonastik:
+                        grupi_punktid = [p for p in sonastik if sonastik[p].get('grupp') == grupp]
+                        if not grupi_punktid:  # Kui grupis pole enam punkte
+                            del sonastik[grupp]
+                            print(f"Grupp {grupp} on kustutatud, sest see on tühi.")
+                    break
 
         self.uuenda_sonastiku_puu()
 
@@ -584,13 +587,13 @@ class ProgrammiGUI:
         ruudu_koordinaadid = self.canvas.coords(valitud_ruut)
         punktikese_x = (ruudu_koordinaadid[0] + ruudu_koordinaadid[2]) / 2
         punktikese_y = (ruudu_koordinaadid[1] + ruudu_koordinaadid[3]) / 2
-        punktikese = (int(punktikese_x), int(punktikese_y))
+        punktikese_koordinaadid = (int(punktikese_x), int(punktikese_y))
 
         # Leia vastav punkt sõnastikust
         for el in sonastik:
-            if el.startswith('punkt') and punktikese == tuple(sonastik[el]["koordinaat"]):
+            if el.startswith('punkt') and punktikese_koordinaadid == tuple(sonastik[el]["koordinaat"]):
                 # Küsi uus värv
-                uus_varv = askcolor(title="Vali ruudu värv")[1]  # [1] annab hex väärtuse
+                uus_varv = askcolor(title="Vali ruudu värv")[1]  # annab hex väärtuse
                 if uus_varv:
                     # Uuenda lõuendil ruudu värv
                     self.canvas.itemconfig(valitud_ruut, fill=uus_varv)
@@ -602,11 +605,13 @@ class ProgrammiGUI:
         # Värskenda sõnastiku kuvamist
         self.uuenda_sonastiku_puu()
 
-    def andme_dialog(self, punkti_nimi, coords, varv):
+
+    # Sellega avaneb uus aken, kus on palju võimalusi info sisestamiseks
+    def andme_dialog(self, punkti_nimi):
         andmete_aken = tk.Toplevel(self.root)
         andmete_aken.title('Andmete muutmine')
 
-        andmete_aken.attributes('-topmost', True)
+        andmete_aken.attributes('-topmost', True) # Teeb nii, et aken oleks kõige ülemine
 
         tk.Label(andmete_aken, text="Nimi:").grid(row=0, column=0, padx=5, pady=5)
         nimi_var = tk.Entry(andmete_aken)
@@ -645,25 +650,28 @@ class ProgrammiGUI:
         def kommenteerimine():
             return kommenteerimine_var.get("1.0", 'end-1c')
 
+
         def uuenda_seadmete_loend():
             """Uuendab seadmete nimekirja kuvamist."""
             for seade in seadmete_raam.winfo_children():
                 seade.destroy()
 
+            # Arvutab seadmete arvu
             for idx, (seade, vool) in enumerate(seadmed.items()):
                 tk.Label(seadmete_raam, text=f"{seade}:").grid(row=idx, column=0, sticky="w", padx=5, pady=2)
                 vool_var = tk.Entry(seadmete_raam, width=10)
-                vool_var.insert(0, str(vool))
-                vool_var.grid(row=idx, column=1, padx=5, pady=2)
+                vool_var.insert(0, str(vool)) # Sisestab, kui palju voolu seade võtab
+                vool_var.grid(row=idx, column=1, padx=5, pady=2) # Suurendab ridade arvu sõltuvalt seadmete arvust
+
 
                 def salvesta_seadme_vool(nimi=seade, voolu_var=vool_var):
                     try:
                         seadmed[nimi] = int(voolu_var.get())
                     except ValueError:
-                        messagebox.showerror("Viga", "Palun sisesta korrektne number.")
+                        messagebox.showerror("Viga", "Palun sisesta korrektne number.") # Juhul, kui sisestada näiteks tähti või kui ei ole määratud seadmele nime
 
                 tk.Button(seadmete_raam, text="Muuda", command=salvesta_seadme_vool).grid(row=idx, column=2, padx=5,
-                                                                                          pady=2)
+                                                                                          pady=2) # Salvestab seadme voolu sõnasikku
 
                 def eemalda_seade(nimi=seade):
                     del seadmed[nimi]
@@ -673,8 +681,8 @@ class ProgrammiGUI:
 
         uuenda_seadmete_loend()
 
+        # Tekitab kõige peale akna, kus seadmeid lisada
         def lisa_seade():
-            """Avab uue seadme lisamise akna."""
             seade_aken = tk.Toplevel(andmete_aken)
             seade_aken.title("Lisa uus seade")
 
@@ -687,6 +695,7 @@ class ProgrammiGUI:
             tk.Label(seade_aken, text="Vooluvajadus (W):").grid(row=1, column=0, padx=5, pady=5)
             seade_vool_var = tk.Entry(seade_aken)
             seade_vool_var.grid(row=1, column=1, padx=5, pady=5)
+
 
             def salvesta_seade():
                 nimi = seade_nimi_var.get()
@@ -705,8 +714,10 @@ class ProgrammiGUI:
 
         tk.Button(andmete_aken, text="Lisa uus seade", command=lisa_seade).grid(row=4, column=0, columnspan=2, pady=10)
 
+
         def arvuta_summa():
             return sum(seadmed.values())
+
 
         def salvesta_andmed():
             # Kapiga seonduv
@@ -721,15 +732,15 @@ class ProgrammiGUI:
             if vana_kapp:
                 for k in sonastik:
                     if sonastik[k].get("nimi") == vana_kapp:
-                        sonastik[k]["vooluvajadus"] += sonastik[punkti_nimi]["vooluvajadus"]
+                        sonastik[k]["vooluvajadus"] += sonastik[punkti_nimi]["vooluvajadus"] # Taastab vanale kapile voolu, mida punkt nõudis
 
             if not uus_kapp:
-                sonastik[punkti_nimi]['kapp'] = ''
+                sonastik[punkti_nimi]['kapp'] = '' # Võimaldab eemaldada kapi nii, et ei võta uut kappi
 
             elif uus_kapp:
                 for k in sonastik:
                     if sonastik[k].get("nimi") == uus_kapp:
-                        sonastik[k]["vooluvajadus"] -= arvuta_summa()
+                        sonastik[k]["vooluvajadus"] -= arvuta_summa() # Arvutab kapi voolust punkti voolu maha
                         sonastik[punkti_nimi]["kapp"] = uus_kapp
 
             # Ülejäänud andmete salvestamine
@@ -743,12 +754,15 @@ class ProgrammiGUI:
             self.uuenda_punktid()
             andmete_aken.destroy()
 
+
         def tühista():
             andmete_aken.destroy()
 
         tk.Button(andmete_aken, text="Salvesta", command=salvesta_andmed).grid(row=12, column=0, padx=5, pady=10)
         tk.Button(andmete_aken, text="Tühista", command=tühista).grid(row=12, column=1, padx=5, pady=10)
 
+
+    # Näitab, mis punktid valitud kappi kuuluvad ja palju nad voolu võtavad
     def naita_kapi_punkte(self, kapp_id):
         kapi_aken = tk.Toplevel(self.root)
         kapi_aken.title(f"Punktid kapis: {sonastik[kapp_id]['nimi']}")
@@ -765,4 +779,4 @@ class ProgrammiGUI:
         tk.Button(kapi_aken, text="Sulge", command=kapi_aken.destroy).pack(pady=10)
 
 
-ProgrammiGUI()
+ProgrammiGUI() # Käivitab programmi
