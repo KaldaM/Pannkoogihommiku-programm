@@ -37,7 +37,7 @@ class ProgrammiGUI:
         self.mõõdulindi_summa = 0
         self.summa_tekst = 0
         self.mõõdulindi_punktiloendur = 0
-        self.suurus = 19.67 # suurus, mille järgi punktid moodustatakse. Hetkel tulevad punktid 3x3 meetrit
+        self.suurus = 19.60 # suurus, mille järgi punktid moodustatakse. Hetkel tulevad punktid 3x3 meetrit
         self.root = tk.Tk()
         self.root.geometry("1800x1000")
         self.root.title("Koordinaatide valimine")
@@ -131,13 +131,13 @@ class ProgrammiGUI:
     def lisa_kapid(self):
         """Lisab kaardile 7 elektrikappi, millest 2 on punased (32A) ja ülejäänud sinised."""
         kapid = [
-            {"nimi": "PVK 1", "koordinaat": (462, 588), "vool": 11000, "värv": "#0000FF"},
-            {"nimi": "PVK 2", "koordinaat": (685, 482), "vool": 22000, "värv": "#FF0000"},
-            {"nimi": "PVK 3", "koordinaat": (920, 383), "vool": 11000, "värv": "#0000FF"},
-            {"nimi": "PVK 10", "koordinaat": (255, 542), "vool": 11000, "värv": "#0000FF"},
-            {"nimi": "PVK 9", "koordinaat": (350,311), "vool": 11000, "värv": "#0000FF"},
-            {"nimi": "PVK 7", "koordinaat": (579, 258), "vool": 22000, "värv": "#FF0000"},
-            {"nimi": "PVK 6", "koordinaat": (773, 207), "vool": 11000, "värv": "#0000FF"},
+            {"nimi": "PVK 1", "koordinaat": (459, 589), "vool": 11000, "värv": "#0000FF"},
+            {"nimi": "PVK 2", "koordinaat": (679, 480), "vool": 22000, "värv": "#FF0000"},
+            {"nimi": "PVK 3", "koordinaat": (908, 383), "vool": 11000, "värv": "#0000FF"},
+            {"nimi": "PVK 10", "koordinaat": (255, 543), "vool": 11000, "värv": "#0000FF"},
+            {"nimi": "PVK 9", "koordinaat": (348,315), "vool": 11000, "värv": "#0000FF"},
+            {"nimi": "PVK 7", "koordinaat": (573, 262), "vool": 22000, "värv": "#FF0000"},
+            {"nimi": "PVK 6", "koordinaat": (766, 210), "vool": 11000, "värv": "#0000FF"},
         ]
 
         for idx, kapp in enumerate(kapid, start=1):
@@ -390,7 +390,7 @@ class ProgrammiGUI:
 
             # Loome vahemaa punktide vahele, teisendame meetriteks
             vahemaa = round(math.dist(self.mõõdulindi_punktid[self.mõõdulindi_punktiloendur][1],
-                               self.mõõdulindi_punktid[self.mõõdulindi_punktiloendur + 1][1]) / 6.536, 2
+                               self.mõõdulindi_punktid[self.mõõdulindi_punktiloendur + 1][1]) / 6.4635, 2
             )
             self.mõõdulindi_summa += vahemaa
 
