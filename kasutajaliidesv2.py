@@ -59,25 +59,17 @@ class ProgrammiGUI:
         self.menubar.add_cascade(menu=self.filemenu, label='File')
         self.menubar.add_cascade(menu=self.kujundus, label='Kujundus')
 
+        self.menubar.add_command(label='Kasutamise juhend', command=self.kasutamise_juhend)
+
         self.root.config(menu=self.menubar)
 
         # juhised kaardi kasutamiseks
         self.kaardijuhis = tk.StringVar()
         self.kaardijuhis.set(
-            "Kaardil punktil vajutades on võimalik punkti muuta, sama töötab ka tabeli kaudu. Kaardi all paremal on kolm nuppu. Need muudavad hiire funktsioone."
+            "Üleval menüüreal on võimalik avada detailne juhend programmi kasutamiseks"
         )
         self.silt = tk.Label(self.root, textvariable=self.kaardijuhis, font=("Arial", 12, "bold"))
         self.silt.pack(padx=15, pady=12, anchor="nw")
-
-        self.kaardijuhis2 = tk.StringVar()
-        self.kaardijuhis2.set(
-            """Mõõdulint: vasaku klõpsuga saab lisada mõõdulindi punkte, aga paremaga kustutad saadud tulemused (ükskõik, kus vajutades).\n
-            Lisa punkte: vasaku klõpsuga lisad punkte (telgid), aga paremaga kustutad vastavad punktid (otse peale vajutades).\n
-            Liiguta punkte: vasaku klõpsuga hoiad soovitud punkti peal ja lohistad.
-            """
-        )
-        self.silt = tk.Label(self.root, textvariable=self.kaardijuhis2, font=("Arial", 12, "bold"), justify="left")
-        self.silt.pack(anchor="sw", side="bottom", pady=60, padx=10)
 
         # canvase tegemine
         self.canvas = tk.Canvas(self.root, width=1296, height=697)
@@ -128,6 +120,57 @@ class ProgrammiGUI:
         self.valitud_canvas_id = None
 
         self.root.mainloop()
+
+
+    # Annab detailse juhendi programmi funktsioonide kohta
+    def kasutamise_juhend(self):
+        juhend = """
+    Üleval menüüreal on alamenüü "File". Selle kaudu on võimalik programm sulgeda (võib ka ristist sulgeda). 
+    Teine funktsioon seal on import. Selle kaudu saad valida .txt faili, kuhu olid exportinud programmi sõnastiku. 
+    See kustutab hetkel programmis olevad punktid ning asendab need failis olevate punktidega.
+    Kolmas funktsioon seal on export. Sellega saad valida .txt faili, kuhu andmed salvestada. See salvestab kõik andmed. 
+    Neljas funktsioon on "Kirjuta andmed tekstina", millega saad valida .txt faili, kuhu programm kirjutab sõnastikus olev info loetavalt ja jätab välja ebavajaliku info.
+
+    Teine alamenüü on "Kujundus". Sealt saad vahetada ortofoto ja tavakaardi vahel.
+
+    Programmis on paremal kujutatud kõik punktid ja grupid ning kapid. Kappidel on näha, palju nendes voolu alles on. 
+    Gruppe on võimalik vahetada, muutes punktil grupi nime. Tabelis on võimalik punktidele vajutada ning see markeerib kaardil antud punkti ning avab punkti muutmise menüü.
+
+    Kaardi all on kolm nuppu:
+    1. Mõõdulint: vasaku klõpsuga mõõdad klikkide vahelisi vahemaid ning all paremal on vahemaade summa. Parema klikiga saab mõõdulindi jooned kustutada.
+    2. Punktide liigutamine: hoia vasakut hiirenuppu punkti peal ja lohista.
+    3. Punktide lisamine: vasaku klõpsuga lisad punkti, mis tuleb algselt punasena.
+
+    Rullikul vajutamisega saad muuta punktide värvi. Kui mõõdulint pole aktiveeritud, saad parema klõpsuga punktil vajutades selle kustutada.
+
+    Kui ükski nupp pole aktiveeritud, siis kaardil punktile vajutades avaneb andmete muutmise aken. 
+    Seal saad määrata:
+    - punkti nime,
+    - grupi nime,
+    - elektrikapi, millest punkt voolu võtab.
+
+    Andmete muutmise aknas saad seadmeid lisada, muuta või kustutada. 
+    Samuti saad lisada kommentaare punkti kohta.
+
+    Kui vajutad kaardil kapile, siis näed, millised punktid sellele kapile määratud on ja palju need voolu vajavad.
+    
+    Küsimuste püsimise korral või programmi kõrvaltoimete tekkimisel pidage nõu arsti või Matteus Kaldaga.
+    """
+        # Kuvab juhendi dialoogiboksis
+        juhendi_aken = tk.Toplevel(self.root)
+        juhendi_aken.title("Programmi kasutamise juhend")
+        juhendi_aken.geometry("850x700")
+
+        # Lisame teksti keritavasse alasse
+        scroll = tk.Scrollbar(juhendi_aken)
+        text = tk.Text(juhendi_aken, wrap="word", font=("Arial", 12), yscrollcommand=scroll.set, bg="white")
+        text.insert("1.0", juhend)
+        text.config(state="disabled")  # Muuda tekst ainult loetavaks
+
+        # Paigutus
+        text.pack(side="left", fill="both", expand=True)
+        scroll.pack(side="right", fill="y")
+        scroll.config(command=text.yview)
 
 
     def lisa_kapid(self):
