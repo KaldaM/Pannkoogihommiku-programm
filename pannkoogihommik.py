@@ -3,16 +3,16 @@
 # 2024/2025 sügissemester
 #
 # Projekt
-# Teema: Pannkoogihommiku programm alpha versioon
+# Teema: Pannkoogihommiku planeerija beta versioon
 #
 #
 # Autorid: Matteus Kalda ja Ott Allik
+
+# Vajalikud failid: pannkoogihommik.py, taustafunktsioonid.py, tavakaart.png, ortofoto.png
 #
-# Lisakommentaar (nt käivitusjuhend): Programmis saab hetkel lisada vasaku nupuvajutusega faili, eemaldada, paremanupuvajutusega. Kui lisada punkt,
-# on võimalik sisestada infot selle kohta, aga ei pea. Tuleb vajutada salvesta nuppu. Sõnastiku on võimalik importida ja exportida fail menüü kaudu.
-# Selleks tuleb kasutada .txt failitüüpi.
-# Külje peal on näha sõnastiku, et näha kuidas sisestatud andmed muutuvad. Tulevikus tuleks see parema välimusega ning interaktiivsem
-# Kui punktid kuuluvad samasse gruppi, siis on sõnastikus näha punktide voolu summat.
+# Lisakommentaar (nt käivitusjuhend):
+# Programmi käivitamiseks tuleb käivitada pannkoogihommik.py
+# Detailne kasutusjuhend on võimalik leida ülevalt menüürealt. Programmi demonstreerimiseks võib importida "S24 plaan.txt" faili, mille programmiga kaasa andsime.
 ##################################################
 
 import tkinter as tk
