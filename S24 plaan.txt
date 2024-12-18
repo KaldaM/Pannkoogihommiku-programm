@@ -1,0 +1,469 @@
+{
+    "kapp1": {
+        "nimi": "PVK 1",
+        "koordinaat": [
+            459,
+            589
+        ],
+        "vooluvajadus": 2600,
+        "värv": "#0000FF",
+        "grupp": "Kapid",
+        "canvas_id": 2
+    },
+    "kapp2": {
+        "nimi": "PVK 2",
+        "koordinaat": [
+            679,
+            480
+        ],
+        "vooluvajadus": 2800,
+        "värv": "#FF0000",
+        "grupp": "Kapid",
+        "canvas_id": 3
+    },
+    "kapp3": {
+        "nimi": "PVK 3",
+        "koordinaat": [
+            908,
+            383
+        ],
+        "vooluvajadus": 2000,
+        "värv": "#0000FF",
+        "grupp": "Kapid",
+        "canvas_id": 4
+    },
+    "kapp4": {
+        "nimi": "PVK 10",
+        "koordinaat": [
+            255,
+            543
+        ],
+        "vooluvajadus": 5000,
+        "värv": "#0000FF",
+        "grupp": "Kapid",
+        "canvas_id": 5
+    },
+    "kapp5": {
+        "nimi": "PVK 9",
+        "koordinaat": [
+            348,
+            315
+        ],
+        "vooluvajadus": 8000,
+        "värv": "#0000FF",
+        "grupp": "Kapid",
+        "canvas_id": 6
+    },
+    "kapp6": {
+        "nimi": "PVK 7",
+        "koordinaat": [
+            573,
+            262
+        ],
+        "vooluvajadus": 9000,
+        "värv": "#FF0000",
+        "grupp": "Kapid",
+        "canvas_id": 7
+    },
+    "kapp7": {
+        "nimi": "PVK 6",
+        "koordinaat": [
+            766,
+            210
+        ],
+        "vooluvajadus": 1000,
+        "värv": "#0000FF",
+        "grupp": "Kapid",
+        "canvas_id": 8
+    },
+    "punkt-1": {
+        "nimi": "Grillvõiku 1",
+        "koordinaat": [
+            636,
+            461
+        ],
+        "värv": "#a0e958",
+        "grupp": "PVK2",
+        "vooluvajadus": 3000,
+        "seadmed": {
+            "gv1": 750,
+            "gv2": 750,
+            "gv3": 750,
+            "gv4": 750
+        },
+        "kommentaar": "7-10 meetrit pikendust",
+        "canvas_id": 797,
+        "kapp": "PVK 2"
+    },
+    "punkt-2": {
+        "nimi": "Grillvõiku 2",
+        "koordinaat": [
+            659,
+            454
+        ],
+        "värv": "#5ee361",
+        "grupp": "PVK2",
+        "vooluvajadus": 3000,
+        "seadmed": {
+            "gv1": 750,
+            "gv2": 750,
+            "gv3": 750,
+            "gv4": 750
+        },
+        "kommentaar": "2-5 meetrit pikendust",
+        "canvas_id": 798,
+        "kapp": "PVK 2"
+    },
+    "punkt-3": {
+        "nimi": "Soolased pannkoogid",
+        "koordinaat": [
+            680,
+            447
+        ],
+        "värv": "#eb56a8",
+        "grupp": "PVK2",
+        "vooluvajadus": 3200,
+        "seadmed": {
+            "pliit1": 1600,
+            "pliit2": 1600
+        },
+        "kommentaar": "",
+        "canvas_id": 799,
+        "kapp": "PVK 2"
+    },
+    "punkt-4": {
+        "nimi": "Omlett 1",
+        "koordinaat": [
+            701,
+            441
+        ],
+        "värv": "#f9f448",
+        "grupp": "PVK2",
+        "vooluvajadus": 5000,
+        "seadmed": {
+            "pliidid": 5000
+        },
+        "kommentaar": "",
+        "canvas_id": 800,
+        "kapp": "PVK 2"
+    },
+    "punkt-5": {
+        "nimi": "Omlett 2",
+        "koordinaat": [
+            721,
+            434
+        ],
+        "värv": "#5353ee",
+        "grupp": "PVK2",
+        "vooluvajadus": 5000,
+        "seadmed": {
+            "pliidid": 5000
+        },
+        "kommentaar": "",
+        "canvas_id": 801,
+        "kapp": "PVK 2"
+    },
+    "punkt-6": {
+        "nimi": "Tehnikatelk",
+        "koordinaat": [
+            787,
+            405
+        ],
+        "värv": "#93acae",
+        "grupp": "PVK3",
+        "vooluvajadus": 6000,
+        "seadmed": {
+            "aktiivkõlarid": 2500,
+            "passiivkõlarid": 2000,
+            "Hartwall": 1500
+        },
+        "kommentaar": "",
+        "canvas_id": 802,
+        "kapp": "PVK 3"
+    },
+    "punkt-7": {
+        "nimi": "Meie esemed",
+        "koordinaat": [
+            814,
+            397
+        ],
+        "värv": "#939fae",
+        "grupp": "Ei vaja voolu",
+        "vooluvajadus": 0,
+        "seadmed": {},
+        "kommentaar": "",
+        "canvas_id": 803,
+        "kapp": ""
+    },
+    "PVK2": {
+        "grupi vooluvajadus": 19200
+    },
+    "PVK3": {
+        "grupi vooluvajadus": 9000
+    },
+    "punkt-8": {
+        "nimi": "Swed",
+        "koordinaat": [
+            368,
+            444
+        ],
+        "värv": "#f8a549",
+        "grupp": "PVK10",
+        "vooluvajadus": 6000,
+        "seadmed": {
+            "keetja1": 2000,
+            "keetja2": 2000,
+            "keetja3": 2000
+        },
+        "kommentaar": "",
+        "canvas_id": 804,
+        "kapp": "PVK 10"
+    },
+    "punkt-9": {
+        "nimi": "Swed2",
+        "koordinaat": [
+            360,
+            423
+        ],
+        "värv": "#f49c4d",
+        "grupp": "PVK10",
+        "vooluvajadus": 0,
+        "seadmed": {},
+        "kommentaar": "",
+        "canvas_id": 805,
+        "kapp": ""
+    },
+    "PVK10": {
+        "grupi vooluvajadus": 6000
+    },
+    "punkt-10": {
+        "nimi": "Nõudepesu",
+        "koordinaat": [
+            374,
+            383
+        ],
+        "värv": "#c57cc2",
+        "grupp": "PVK9",
+        "vooluvajadus": 3000,
+        "seadmed": {
+            "kraan": 3000
+        },
+        "kommentaar": "",
+        "canvas_id": 806,
+        "kapp": "PVK 9"
+    },
+    "PVK9": {
+        "grupi vooluvajadus": 3000
+    },
+    "punkt-11": {
+        "nimi": "Nõudepesu",
+        "koordinaat": [
+            755,
+            423
+        ],
+        "värv": "#5b85e6",
+        "grupp": "PVK3",
+        "vooluvajadus": 3000,
+        "seadmed": {
+            "Kraan": 3000
+        },
+        "kommentaar": "",
+        "canvas_id": 807,
+        "kapp": "PVK 3"
+    },
+    "punkt-12": {
+        "nimi": "TP pannkoogid 1",
+        "koordinaat": [
+            392,
+            490
+        ],
+        "värv": "#f8eb49",
+        "grupp": "PVK1",
+        "vooluvajadus": 3000,
+        "seadmed": {
+            "pliit1": 1000,
+            "pliit2": 1000,
+            "pliit3": 1000
+        },
+        "kommentaar": "",
+        "canvas_id": 808,
+        "kapp": "PVK 1"
+    },
+    "punkt-13": {
+        "nimi": "TP pannkoogid 2",
+        "koordinaat": [
+            404,
+            511
+        ],
+        "värv": "#f8eb49",
+        "grupp": "PVK1",
+        "vooluvajadus": 3000,
+        "seadmed": {
+            "pliit1": 1000,
+            "pliit2": 1000,
+            "pliit3": 1000
+        },
+        "kommentaar": "",
+        "canvas_id": 809,
+        "kapp": "PVK 1"
+    },
+    "punkt-14": {
+        "nimi": "TP minipannkoogid",
+        "koordinaat": [
+            420,
+            532
+        ],
+        "värv": "#e061b4",
+        "grupp": "PVK1",
+        "vooluvajadus": 2400,
+        "seadmed": {
+            "pliit1": 1200,
+            "pliit2": 1200
+        },
+        "kommentaar": "",
+        "canvas_id": 810,
+        "kapp": "PVK 1"
+    },
+    "PVK1": {
+        "grupi vooluvajadus": 8400
+    },
+    "punkt-15": {
+        "nimi": "Ela telk",
+        "koordinaat": [
+            474,
+            365
+        ],
+        "värv": "#e75a8b",
+        "grupp": "PVK7",
+        "vooluvajadus": 3000,
+        "seadmed": {
+            "ei tea": 3000
+        },
+        "kommentaar": "",
+        "canvas_id": 811,
+        "kapp": "PVK 7"
+    },
+    "punkt-16": {
+        "nimi": "Info",
+        "koordinaat": [
+            513,
+            383
+        ],
+        "värv": "#939fae",
+        "grupp": "Ei vaja voolu",
+        "vooluvajadus": 0,
+        "seadmed": {},
+        "kommentaar": "",
+        "canvas_id": 812,
+        "kapp": ""
+    },
+    "punkt-17": {
+        "nimi": "Vegan pannkoogid",
+        "koordinaat": [
+            537,
+            380
+        ],
+        "värv": "#fbc546",
+        "grupp": "PVK7",
+        "vooluvajadus": 2000,
+        "seadmed": {
+            "pliit1": 1000,
+            "pliit2": 1000
+        },
+        "kommentaar": "",
+        "canvas_id": 813,
+        "kapp": "PVK 7"
+    },
+    "punkt-18": {
+        "nimi": "Vahvlid",
+        "koordinaat": [
+            559,
+            378
+        ],
+        "värv": "#fbff42",
+        "grupp": "PVK7",
+        "vooluvajadus": 2000,
+        "seadmed": {
+            "masin1": 1000,
+            "masin2": 1000
+        },
+        "kommentaar": "",
+        "canvas_id": 814,
+        "kapp": "PVK 7"
+    },
+    "punkt-19": {
+        "nimi": "Vahvel 2",
+        "koordinaat": [
+            580,
+            372
+        ],
+        "värv": "#fbff42",
+        "grupp": "PVK7",
+        "vooluvajadus": 2000,
+        "seadmed": {
+            "masin1": 1000,
+            "masin2": 1000
+        },
+        "kommentaar": "",
+        "canvas_id": 815,
+        "kapp": "PVK 7"
+    },
+    "punkt-20": {
+        "nimi": "Tatar",
+        "koordinaat": [
+            600,
+            367
+        ],
+        "värv": "#939fae",
+        "grupp": "Ei vaja voolu",
+        "vooluvajadus": 0,
+        "seadmed": {},
+        "kommentaar": "Ei vaja voolu",
+        "canvas_id": 816,
+        "kapp": ""
+    },
+    "punkt-21": {
+        "nimi": "Smuuti",
+        "koordinaat": [
+            622,
+            362
+        ],
+        "värv": "#4956f8",
+        "grupp": "PVK7",
+        "vooluvajadus": 4000,
+        "seadmed": {
+            "smuuti": 4000
+        },
+        "kommentaar": "Vajavad 3 pesa",
+        "canvas_id": 817,
+        "kapp": "PVK 7"
+    },
+    "PVK6": {
+        "grupi vooluvajadus": 0
+    },
+    "PVK7": {
+        "grupi vooluvajadus": 13000
+    },
+    "punkt-22": {
+        "nimi": "Pierre",
+        "koordinaat": [
+            804,
+            316
+        ],
+        "värv": "#804000",
+        "grupp": "Pierre",
+        "vooluvajadus": 10000,
+        "seadmed": {
+            "pierre": 10000
+        },
+        "kommentaar": "nad tahavad 3 faasi",
+        "canvas_id": 818,
+        "kapp": "PVK 6"
+    },
+    "Pierre": {
+        "grupi vooluvajadus": 10000
+    },
+    "Ei vaja voolu": {
+        "grupi vooluvajadus": 0
+    }
+}

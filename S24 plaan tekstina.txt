@@ -1,0 +1,203 @@
+Grupp: PVK2
+Grupi vooluvajadus: 19200
+Gruppi kuuluvad punktid:
+
+Nimi: Grillvõiku 1
+Elektrikapp: PVK 2
+Vooluvajadus kokku: 3000
+Seadmed:
+   gv1: 750W
+   gv2: 750W
+   gv3: 750W
+   gv4: 750W
+Kommentaarid:
+   7-10 meetrit pikendust
+
+Nimi: Grillvõiku 2
+Elektrikapp: PVK 2
+Vooluvajadus kokku: 3000
+Seadmed:
+   gv1: 750W
+   gv2: 750W
+   gv3: 750W
+   gv4: 750W
+Kommentaarid:
+   2-5 meetrit pikendust
+
+Nimi: Soolased pannkoogid
+Elektrikapp: PVK 2
+Vooluvajadus kokku: 3200
+Seadmed:
+   pliit1: 1600W
+   pliit2: 1600W
+
+Nimi: Omlett 1
+Elektrikapp: PVK 2
+Vooluvajadus kokku: 5000
+Seadmed:
+   pliidid: 5000W
+
+Nimi: Omlett 2
+Elektrikapp: PVK 2
+Vooluvajadus kokku: 5000
+Seadmed:
+   pliidid: 5000W
+
+--------------------------------------------
+
+Grupp: PVK3
+Grupi vooluvajadus: 9000
+Gruppi kuuluvad punktid:
+
+Nimi: Tehnikatelk
+Elektrikapp: PVK 3
+Vooluvajadus kokku: 6000
+Seadmed:
+   aktiivkõlarid: 2500W
+   passiivkõlarid: 2000W
+   Hartwall: 1500W
+
+Nimi: Nõudepesu
+Elektrikapp: PVK 3
+Vooluvajadus kokku: 3000
+Seadmed:
+   Kraan: 3000W
+
+--------------------------------------------
+
+Grupp: PVK10
+Grupi vooluvajadus: 6000
+Gruppi kuuluvad punktid:
+
+Nimi: Swed
+Elektrikapp: PVK 10
+Vooluvajadus kokku: 6000
+Seadmed:
+   keetja1: 2000W
+   keetja2: 2000W
+   keetja3: 2000W
+
+Nimi: Swed2
+Vooluvajadus kokku: 0
+
+--------------------------------------------
+
+Grupp: PVK9
+Grupi vooluvajadus: 3000
+Gruppi kuuluvad punktid:
+
+Nimi: Nõudepesu
+Elektrikapp: PVK 9
+Vooluvajadus kokku: 3000
+Seadmed:
+   kraan: 3000W
+
+--------------------------------------------
+
+Grupp: PVK1
+Grupi vooluvajadus: 8400
+Gruppi kuuluvad punktid:
+
+Nimi: TP pannkoogid 1
+Elektrikapp: PVK 1
+Vooluvajadus kokku: 3000
+Seadmed:
+   pliit1: 1000W
+   pliit2: 1000W
+   pliit3: 1000W
+
+Nimi: TP pannkoogid 2
+Elektrikapp: PVK 1
+Vooluvajadus kokku: 3000
+Seadmed:
+   pliit1: 1000W
+   pliit2: 1000W
+   pliit3: 1000W
+
+Nimi: TP minipannkoogid
+Elektrikapp: PVK 1
+Vooluvajadus kokku: 2400
+Seadmed:
+   pliit1: 1200W
+   pliit2: 1200W
+
+--------------------------------------------
+
+Grupp: PVK6
+Grupi vooluvajadus: 0
+Gruppi kuuluvad punktid:
+
+--------------------------------------------
+
+Grupp: PVK7
+Grupi vooluvajadus: 13000
+Gruppi kuuluvad punktid:
+
+Nimi: Ela telk
+Elektrikapp: PVK 7
+Vooluvajadus kokku: 3000
+Seadmed:
+   ei tea: 3000W
+
+Nimi: Vegan pannkoogid
+Elektrikapp: PVK 7
+Vooluvajadus kokku: 2000
+Seadmed:
+   pliit1: 1000W
+   pliit2: 1000W
+
+Nimi: Vahvlid
+Elektrikapp: PVK 7
+Vooluvajadus kokku: 2000
+Seadmed:
+   masin1: 1000W
+   masin2: 1000W
+
+Nimi: Vahvel 2
+Elektrikapp: PVK 7
+Vooluvajadus kokku: 2000
+Seadmed:
+   masin1: 1000W
+   masin2: 1000W
+
+Nimi: Smuuti
+Elektrikapp: PVK 7
+Vooluvajadus kokku: 4000
+Seadmed:
+   smuuti: 4000W
+Kommentaarid:
+   Vajavad 3 pesa
+
+--------------------------------------------
+
+Grupp: Pierre
+Grupi vooluvajadus: 10000
+Gruppi kuuluvad punktid:
+
+Nimi: Pierre
+Elektrikapp: PVK 6
+Vooluvajadus kokku: 10000
+Seadmed:
+   pierre: 10000W
+Kommentaarid:
+   nad tahavad 3 faasi
+
+--------------------------------------------
+
+Grupp: Ei vaja voolu
+Grupi vooluvajadus: 0
+Gruppi kuuluvad punktid:
+
+Nimi: Meie esemed
+Vooluvajadus kokku: 0
+
+Nimi: Info
+Vooluvajadus kokku: 0
+
+Nimi: Tatar
+Vooluvajadus kokku: 0
+Kommentaarid:
+   Ei vaja voolu
+
+--------------------------------------------
+
