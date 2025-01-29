@@ -84,16 +84,16 @@ def koik_andmed_teksti(sonastik, failinimi):
                 for punkt2, andmed2 in sonastik.items():
                     if 'grupp' in andmed2 and andmed2['grupp'] == grupp:
                         if andmed2['nimi'] != '':
-                            fail.write(f'Nimi: {andmed2['nimi']}\n')
+                            fail.write(f"Nimi: {andmed2['nimi']}\n")
                         else:
                             fail.write(f'Nimi: {punkt2}\n')
                         if andmed2['kapp'] != '':
-                            fail.write(f'Elektrikapp: {andmed2['kapp']}\n')
-                        fail.write(f'Vooluvajadus kokku: {andmed2['vooluvajadus']}\n')
+                            fail.write(f"Elektrikapp: {andmed2['kapp']}\n")
+                        fail.write(f"Vooluvajadus kokku: {andmed2['vooluvajadus']}\n")
                         if andmed2['seadmed'] != {}:
                             fail.write(f'Seadmed:\n')
                             for seade in andmed2['seadmed']:
-                                fail.write(f'   {seade}: {andmed2['seadmed'][seade]}W\n')
+                                fail.write(f"   {seade}: {andmed2['seadmed'][seade]}W\n")
                         if andmed2['kommentaar'] != '':
                             fail.write(f'Kommentaarid:\n')
                             read = andmed2['kommentaar'].split('\n')
@@ -112,16 +112,16 @@ def koik_andmed_teksti(sonastik, failinimi):
             for punkt2, andmed2 in sonastik.items():
                 if 'grupp' in andmed2 and andmed2['grupp'] == '':
                     if andmed2['nimi'] != '':
-                        fail.write(f'Nimi: {andmed2['nimi']}\n')
+                        fail.write(f"Nimi: {andmed2['nimi']}\n")
                     else:
                         fail.write(f'Nimi: {punkt2}\n')
                     if 'kapp' in andmed2 and andmed2['kapp'] != '':
-                        fail.write(f'Elektrikapp: {andmed2['kapp']}\n')
-                    fail.write(f'Vooluvajadus kokku: {andmed2['vooluvajadus']}\n')
+                        fail.write(f"Elektrikapp: {andmed2['kapp']}\n")
+                    fail.write(f"Vooluvajadus kokku: {andmed2['vooluvajadus']}\n")
                     if andmed2['seadmed'] != {}:
                         fail.write(f'Seadmed:\n')
                         for seade in andmed2['seadmed']:
-                            fail.write(f'   {seade}: {andmed2['seadmed'][seade]}W\n')
+                            fail.write(f"   {seade}: {andmed2['seadmed'][seade]}W\n")
                     if andmed2['kommentaar'] != '':
                         fail.write(f'Kommentaarid:\n')
                         read = andmed2['kommentaar'].split('\n')
